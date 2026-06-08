@@ -15,7 +15,6 @@ class AlarmScheduler {
             val delayInMinutes = 10
             Log.d("ALARM_SCHEDULER", "Alarm für $delayInMinutes gesetzt!")
 
-
             val alarmManager =
                 context.getSystemService(
                     Context.ALARM_SERVICE
