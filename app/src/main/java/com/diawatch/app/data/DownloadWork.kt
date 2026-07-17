@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import androidx.compose.ui.res.stringResource
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.preferences.core.edit
@@ -13,12 +12,16 @@ import androidx.wear.tiles.TileService
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.diawatch.app.R
+import com.diawatch.app.data.SensorKeys.OLD_TIMESTAMP
 import com.diawatch.app.tile.MainTileService
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
+import java.io.File
 import java.security.MessageDigest
 
 class DownloadWork(appContext: Context, workerParams: WorkerParameters):
@@ -28,6 +31,8 @@ class DownloadWork(appContext: Context, workerParams: WorkerParameters):
     override suspend fun doWork(): Result {
 
         Log.d("DOWNLOAD_WORK", "Work start yay.")
+        val logFile = File(applicationContext.filesDir, "debug.log")
+        logFile.appendText("Work start at ${System.currentTimeMillis()} \n")
 
         //sehr schlechta code tuan niamols es token exposed in code inna, nur für testzweck
         val email = "***REMOVED***"
@@ -65,6 +70,7 @@ class DownloadWork(appContext: Context, workerParams: WorkerParameters):
 
         val token = loginJSON.getJSONObject("data").getJSONObject("authTicket").getString("token")
         Log.d("DOWNLOAD_WORK", "retrieved token: $token")
+
         val userID = loginJSON.getJSONObject("data").getJSONObject("user").getString("id")
         Log.d("DOWNLOAD_WORK", "retrieved uid: $userID")
 
@@ -118,13 +124,19 @@ class DownloadWork(appContext: Context, workerParams: WorkerParameters):
 
         val glucoseValue = graphJSON.getJSONObject("data").getJSONObject("connection").getJSONObject("glucoseMeasurement").getDouble("Value")
         Log.d("DOWNLOAD_WORK", "retrieved glucoseValue: $glucoseValue")
+        logFile.appendText("Retieved value of $glucoseValue at ${System.currentTimeMillis()} \n")
+
+        val time = graphJSON.getJSONObject("data").getJSONObject("connection").getJSONObject("glucoseMeasurement").getString("Timestamp")
+        Log.d("DOWNLOAD_WORK", "retrieved Timestamp: $time")
 
 
         //Speichere neue Sensordaten und fordere Tile dazu auf, sich upzudaten
         applicationContext.sensorDataStore.edit {
             preferences -> preferences[SensorKeys.LAST_VALUE] = glucoseValue
+            preferences[SensorKeys.TIMESTAMP] = System.currentTimeMillis().toDouble()
         }
 
+        Log.d("DOWNLOAD_WORK", "current Time: ${System.currentTimeMillis()}, historic values: ${applicationContext.sensorDataStore.data.map {preferences -> preferences[OLD_TIMESTAMP] ?: ""}.first()}")
 
 
         if(glucoseValue !in 4.0..15.0) {
@@ -145,6 +157,7 @@ class DownloadWork(appContext: Context, workerParams: WorkerParameters):
 
 
         TileService.getUpdater(applicationContext).requestUpdate(MainTileService::class.java)
+        logFile.appendText("Updated tile at ${System.currentTimeMillis()}")
 
         return Result.success()
     }
@@ -157,8 +170,8 @@ class DownloadWork(appContext: Context, workerParams: WorkerParameters):
         return MessageDigest.getInstance("SHA-256")
             .digest(string.toByteArray())
             .joinToString("") {"%02x".format(it)}
-        //kotlin nutzt eine spezielle form für lambda syntax. das {} ist ein argument für fie funktion jointostring.
-        //"%02x" bedeutet konvertiere jedes byte (it) zu hex (x), nutze immer 2 symbole (2) und fülle mit 0 (0). % bedeutet einfach dass dort das formatieren beginnt
+        //kotlin nutzt eine spezielle form für lambda syntax. das {} ist ein argument für die funktion jointostring.
+        //"%02x" bedeutet konvertiere jedes byte (it) zu hex (x), nutze immer 2 symbole (2) und fülle mit 0 (0). % bedeutet einfach dass eine Formatierungsangabe beginnt
 
     }
 }

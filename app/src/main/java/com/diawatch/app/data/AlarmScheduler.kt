@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import java.io.File
 
 class AlarmScheduler {
 
@@ -14,7 +15,8 @@ class AlarmScheduler {
         fun schedule(context: Context) {
             val delayInMinutes = 10
             Log.d("ALARM_SCHEDULER", "Alarm für $delayInMinutes gesetzt!")
-
+            val logFile = File(context.filesDir, "debug.log")
+            logFile.appendText("Alram started at ${System.currentTimeMillis()} \n")
             val alarmManager =
                 context.getSystemService(
                     Context.ALARM_SERVICE

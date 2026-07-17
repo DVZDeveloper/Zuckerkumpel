@@ -32,6 +32,7 @@ import com.diawatch.app.R
 import com.diawatch.app.data.AlarmScheduler
 import com.diawatch.app.data.WorkScheduler
 import com.diawatch.app.presentation.theme.TestTheme
+import java.io.File
 
 
 class MainActivity : ComponentActivity() {
@@ -50,7 +51,8 @@ class MainActivity : ComponentActivity() {
                 }
             )
 
-
+        val logFile = File(applicationContext.filesDir, "debug.log")
+        logFile.appendText("restarted chain due to app boot at ${System.currentTimeMillis()} \n")
         WorkScheduler.schedule(this)
         AlarmScheduler.schedule(this)
 
