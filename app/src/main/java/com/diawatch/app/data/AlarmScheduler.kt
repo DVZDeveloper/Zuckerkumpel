@@ -1,19 +1,17 @@
 package com.diawatch.app.data
 
-import android.content.Context
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import java.io.File
 
 class AlarmScheduler {
 
     companion object {
         fun schedule(context: Context) {
-            val delayInMinutes = 10
+            val delayInMinutes = 5
             Log.d("ALARM_SCHEDULER", "Alarm für $delayInMinutes gesetzt!")
             val logFile = File(context.filesDir, "debug.log")
             logFile.appendText("Alram started at ${System.currentTimeMillis()} \n")
@@ -23,6 +21,8 @@ class AlarmScheduler {
                 ) as AlarmManager
 
             if(alarmManager.canScheduleExactAlarms()) {
+
+                Log.d("ALARM_SCHEDULER", "Exakter Alarm gesetzt!")
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + 1000L * 60 * delayInMinutes,
@@ -37,6 +37,9 @@ class AlarmScheduler {
                     )
                 )
             }else{
+
+                logFile.appendText("Failed to schedule exact alarm! \n")
+
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + 1000L * 60 * delayInMinutes,

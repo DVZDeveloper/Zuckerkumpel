@@ -1,18 +1,15 @@
 
 package com.diawatch.app.presentation
 
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.core.app.NotificationCompat
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.AppScaffold
@@ -30,7 +27,7 @@ import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import androidx.wear.compose.ui.tooling.preview.WearPreviewFontScales
 import com.diawatch.app.R
 import com.diawatch.app.data.AlarmScheduler
-import com.diawatch.app.data.WorkScheduler
+import com.diawatch.app.data.ServiceLauncher
 import com.diawatch.app.presentation.theme.TestTheme
 import java.io.File
 
@@ -53,8 +50,12 @@ class MainActivity : ComponentActivity() {
 
         val logFile = File(applicationContext.filesDir, "debug.log")
         logFile.appendText("restarted chain due to app boot at ${System.currentTimeMillis()} \n")
-        WorkScheduler.schedule(this)
+
+        ServiceLauncher.launch(this)
         AlarmScheduler.schedule(this)
+        //Alte Funktionen zum regelmässigen ausführen des Backends
+        //WorkScheduler.schedule(this)
+
 
         setContent {
             WearApp("Android")

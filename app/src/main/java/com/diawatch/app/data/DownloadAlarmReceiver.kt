@@ -15,7 +15,8 @@ class DownloadAlarmReceiver: BroadcastReceiver() {
         logFile.appendText("Received alarm at ${System.currentTimeMillis()} \n" )
 
         Log.d("DOWNLOAD_ALARM_RECEIVER", "Alarm abgelaufen")
-        WorkScheduler.schedule(context)
+        //WorkScheduler.schedule(context)
+        ServiceLauncher.launch(context)
         AlarmScheduler.schedule(context)
 
     }
