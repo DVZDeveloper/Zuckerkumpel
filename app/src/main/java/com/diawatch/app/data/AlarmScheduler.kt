@@ -12,9 +12,10 @@ class AlarmScheduler {
     companion object {
         fun schedule(context: Context) {
             val delayInMinutes = 5
-            Log.d("ALARM_SCHEDULER", "Alarm für $delayInMinutes gesetzt!")
-            val logFile = File(context.filesDir, "debug.log")
-            logFile.appendText("Alram started at ${System.currentTimeMillis()} \n")
+
+            Debugger.print(context, "ALARM_SCHEDULER", "Alarm set for $delayInMinutes minutes!")
+
+
             val alarmManager =
                 context.getSystemService(
                     Context.ALARM_SERVICE
@@ -22,7 +23,7 @@ class AlarmScheduler {
 
             if(alarmManager.canScheduleExactAlarms()) {
 
-                Log.d("ALARM_SCHEDULER", "Exakter Alarm gesetzt!")
+
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + 1000L * 60 * delayInMinutes,
@@ -37,9 +38,7 @@ class AlarmScheduler {
                     )
                 )
             }else{
-
-                logFile.appendText("Failed to schedule exact alarm! \n")
-
+                Debugger.print(context, "ALARM_SCHEDULER", "MISSING SET EXACT PERMISSION!")
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + 1000L * 60 * delayInMinutes,

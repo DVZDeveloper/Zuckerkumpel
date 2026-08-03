@@ -14,8 +14,7 @@ import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.tooling.preview.Preview
 import androidx.wear.tiles.tooling.preview.TilePreviewData
 import androidx.wear.tooling.preview.devices.WearDevices
-import com.diawatch.app.data.SensorKeys.LAST_VALUE
-import com.diawatch.app.data.SensorKeys.TREND_ARROW
+import com.diawatch.app.data.SensorKeys
 import com.diawatch.app.data.sensorDataStore
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.tiles.SuspendingTileService
@@ -28,8 +27,8 @@ private const val RESOURCES_VERSION = "0"
 class MainTileService : SuspendingTileService() {
 
     override suspend fun tileRequest(requestParams: RequestBuilders.TileRequest): TileBuilders.Tile {
-        val glucoseValue : Double = applicationContext.sensorDataStore.data.map {preferences -> preferences[LAST_VALUE] ?: 0.0}.first()
-        val trendArrow : Int = applicationContext.sensorDataStore.data.map {preferences -> preferences[TREND_ARROW] ?: 0}.first()
+        val glucoseValue : Double = applicationContext.sensorDataStore.data.map {preferences -> preferences[SensorKeys.LAST_VALUE] ?: 0.0}.first()
+        val trendArrow : Int = applicationContext.sensorDataStore.data.map {preferences -> preferences[SensorKeys.TREND_ARROW] ?: 0}.first()
         return tile(requestParams, this, glucoseValue, trendArrow)
     }
 
