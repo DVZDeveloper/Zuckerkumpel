@@ -1,7 +1,11 @@
 <resources>
     <string name="app_name">DiaWatch</string>
-    <string name="hello_world">Hello, %1$s!</string>
     <string name="tile_label">Aktueller Blutzucker</string>
     <string name="sugar_alarm_title">Zuckeralarm</string>
     <string name="sugar_alarm_body">Sensorwert ausserhalb Zielbereich</string>
+    <string name="header_alarm">Alarme</string>
+    <string name="setting_title_high">Hoch</string>
+    <string name="setting_title_low">Tief</string>
+    <string name="header_login">Login</string>
+    <string name="button_login">Einloggen</string>
 </resources>
