@@ -44,6 +44,9 @@
         <receiver
             android:name=".data.DownloadAlarmReceiver"
             android:exported="false" />
+        <receiver
+            android:name=".data.SnoozeAlarmReceiver"
+            android:exported="false" />
 
         <activity
             android:name=".presentation.MainActivity"

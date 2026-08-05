@@ -1,10 +1,12 @@
 package com.diawatch.app.data
 
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import androidx.compose.ui.res.stringResource
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.preferences.core.edit
@@ -23,6 +25,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.security.MessageDigest
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 class CheckBloodSugarService : Service() {
 
@@ -37,15 +41,6 @@ class CheckBloodSugarService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        /*val notification = NotificationCompat.Builder(applicationContext, "alarm_channel")
-            .build()
-
-        ServiceCompat.startForeground(
-            this,
-            67,
-            notification,
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-        )*/
 
         if (syncJob?.isActive == true) {
             //verhindert, dass mehrere Kopien der Coroutine entstehen können
@@ -167,32 +162,76 @@ class CheckBloodSugarService : Service() {
             dataStoreManager.setValue(DataStoreKeys.LAST_VALUE, glucoseValue)
             dataStoreManager.setValue(DataStoreKeys.TREND_ARROW, trendArrow)
 
+            Debugger.print(applicationContext, "CHECK_BLOOD_SUGAR_SERVICE", "Updated tile"
+            )
+            TileService.getUpdater(applicationContext).requestUpdate(MainTileService::class.java)
+
+            val highLimit = dataStoreManager.getValue(DataStoreKeys.HIGH_BLOOD_SUGAR_LIMIT)
+            val lowLimit = dataStoreManager.getValue(DataStoreKeys.LOW_BLOOD_SUGAR_LIMIT)
+            //DataStore ist sehr rechenaufwändig, so mus nur nötigste Arbeit ausgeführt werden
+            if(glucoseValue < highLimit && glucoseValue > lowLimit){
+                stopSelf()
+            }
+
+            val timeoutTimestamp = dataStoreManager.getValue(DataStoreKeys.TIMEOUT_TIMESTAMP)
+
+            val highEnabled = dataStoreManager.getValue(DataStoreKeys.HIGH_BLOOD_SUGAR_ALARM_ENABLED)
+            val highTimeout = dataStoreManager.getValue(DataStoreKeys.HIGH_BLOOD_SUGAR_TIMEOUT)
 
 
+            val action = NotificationCompat.Action.Builder(
+                R.mipmap.ic_launcher_round,
+                applicationContext.getString(R.string.action_sugar_alarm),
+                SnoozeAlarmReceiver.getPendingIntent(applicationContext)
+            ).build()
 
-            if (glucoseValue !in 4.0..15.0) {
+
+            if (glucoseValue >= highLimit && highEnabled && (highTimeout.minutes + timeoutTimestamp.minutes < System.currentTimeMillis().milliseconds)) {
                 try {
                     NotificationManagerCompat.from(applicationContext).notify(
                         173,
                         NotificationCompat.Builder(applicationContext, "alarm_channel")
                             .setSmallIcon(R.mipmap.ic_launcher_round)
                             .setContentTitle(
-                                applicationContext.getString(R.string.sugar_alarm_title)
+                                applicationContext.getString(R.string.title_sugar_alarm_high)
                             )
                             .setContentText(
-                                applicationContext.getString(R.string.sugar_alarm_body)
+                                applicationContext.getString(R.string.body_sugar_alarm_high)
                             )
                             .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                            .addAction(action)
                             .build()
                     )
                 } catch (e: SecurityException) {
                     Log.e("CHECK_BLOOD_SUGAR_SERVICE", "Notification permission missing", e)
                 }
+                stopSelf()
             }
 
-            Debugger.print(applicationContext, "CHECK_BLOOD_SUGAR_SERVICE", "Updated tile"
-            )
-            TileService.getUpdater(applicationContext).requestUpdate(MainTileService::class.java)
+            val lowEnabled = dataStoreManager.getValue(DataStoreKeys.LOW_BLOOD_SUGAR_ALARM_ENABLED)
+            val lowTimeout = dataStoreManager.getValue(DataStoreKeys.LOW_BLOOD_SUGAR_TIMEOUT)
+
+            if (glucoseValue <= lowLimit && lowEnabled && (lowTimeout.minutes + timeoutTimestamp.minutes < System.currentTimeMillis().milliseconds)) {
+                try {
+                    NotificationManagerCompat.from(applicationContext).notify(
+                        173,
+                        NotificationCompat.Builder(applicationContext, "alarm_channel")
+                            .setSmallIcon(R.mipmap.ic_launcher_round)
+                            .setContentTitle(
+                                applicationContext.getString(R.string.title_sugar_alarm_low)
+                            )
+                            .setContentText(
+                                applicationContext.getString(R.string.body_sugar_alarm_low)
+                            )
+                            .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                            .addAction(action)
+                            .build()
+                    )
+                } catch (e: SecurityException) {
+                    Log.e("CHECK_BLOOD_SUGAR_SERVICE", "Notification permission missing", e)
+                }
+                stopSelf()
+            }
 
             stopSelf()
 

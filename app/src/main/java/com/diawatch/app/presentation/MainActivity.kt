@@ -3,6 +3,8 @@ package com.diawatch.app.presentation
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.gestures.Orientation
@@ -30,6 +32,7 @@ import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.EdgeButton
 import androidx.wear.compose.material3.FilledTonalButton
 import androidx.wear.compose.material3.ListHeader
+import androidx.wear.compose.material3.ListHeaderDefaults
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.SplitSwitchButton
@@ -59,30 +62,30 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        getSystemService(NotificationManager::class.java)
-            .createNotificationChannel(
-                NotificationChannel(
-                    "alarm_channel",
-                    "Alarm Channel",
-                    NotificationManager.IMPORTANCE_HIGH
-                ).apply {
-                    description = "High Importance Channel für Alarme"
-                }
-            )
-
-
-        Debugger.print(applicationContext, "MAIN_ACTIVITY", "restarted chain due to app boot")
-
-        ServiceLauncher.launch(this)
-        AlarmScheduler.schedule(this)
-        //Alte Funktionen zum regelmässigen ausführen des Backends
-        //WorkScheduler.schedule(this)
-
-
         setContent {
             DynamicTheme {
                 WearApp()
             }
+        }
+
+        Handler(Looper.getMainLooper()).post {
+            getSystemService(NotificationManager::class.java)
+                .createNotificationChannel(
+                    NotificationChannel(
+                        "alarm_channel",
+                        "Alarm Channel",
+                        NotificationManager.IMPORTANCE_HIGH
+                    ).apply {
+                        description = "High Importance Channel für Alarme"
+                    }
+                )
+
+
+            Debugger.print(applicationContext, "MAIN_ACTIVITY", "restarted chain due to app boot")
+
+            ServiceLauncher.launch(this)
+            AlarmScheduler.schedule(this)
+
         }
     }
 }
@@ -113,9 +116,10 @@ fun TransformingLazyColumnItemScope.AlarmSettingsButton(
     switchPreference: DataStorePreference<Boolean>,
     limitPreference: DataStorePreference<Double>,
 ) {
-    val dataStoreManager = DataStoreManager.getInstance(LocalContext.current)
+    val context = LocalContext.current
+    val dataStoreManager = remember { DataStoreManager.getInstance(context)}
     var checked by remember { mutableStateOf(true) }
-    var limit = 0.0
+    var limit by remember { mutableStateOf(0.0)}
     LaunchedEffect(Unit) {
         checked = dataStoreManager.getValue(switchPreference)
         limit = dataStoreManager.getValue(limitPreference)
@@ -160,6 +164,7 @@ fun TransformingLazyColumnItemScope.BaseListHeader(
     ListHeader(
         Modifier
             .fillMaxWidth()
+            .minimumVerticalContentPadding(ListHeaderDefaults.minimumTopListContentPadding)
             .transformedHeight(this, transformationSpec),
         transformation = SurfaceTransformation(transformationSpec)
     ) {

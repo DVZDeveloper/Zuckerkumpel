@@ -12,7 +12,6 @@ class DownloadAlarmReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 
         Debugger.print(context, "DOWNLOAD_ALARM_RECEIVER", "Alarm abgelaufen")
-        //WorkScheduler.schedule(context)
         ServiceLauncher.launch(context)
         AlarmScheduler.schedule(context)
 

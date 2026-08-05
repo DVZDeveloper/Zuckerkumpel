@@ -1,6 +1,7 @@
 package com.diawatch.app.presentation.theme
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.dynamicColorScheme
@@ -10,7 +11,11 @@ fun DynamicTheme(
     content: @Composable () -> Unit
 ) {
 
-    val colorScheme = dynamicColorScheme(LocalContext.current) ?: MaterialTheme.colorScheme
+    val context = LocalContext.current
+    val fallback = MaterialTheme.colorScheme
+    val colorScheme = remember(context) {
+        dynamicColorScheme(context)
+    } ?: fallback
 
     MaterialTheme(
         colorScheme = colorScheme,
