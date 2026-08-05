@@ -8,4 +8,6 @@
     <string name="setting_title_low">Tief</string>
     <string name="header_login">Login</string>
     <string name="button_login">Einloggen</string>
+    <string name="button_email">E-Mail-Adresse</string>
+    <string name="button_password">Passwort</string>
 </resources>

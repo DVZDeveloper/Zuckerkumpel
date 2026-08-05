@@ -14,12 +14,11 @@ import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.tooling.preview.Preview
 import androidx.wear.tiles.tooling.preview.TilePreviewData
 import androidx.wear.tooling.preview.devices.WearDevices
-import com.diawatch.app.data.SensorKeys
-import com.diawatch.app.data.sensorDataStore
+import com.diawatch.app.data.DataStoreKeys
+import com.diawatch.app.data.DataStoreManager
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.tiles.SuspendingTileService
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+
 
 private const val RESOURCES_VERSION = "0"
 
@@ -27,8 +26,9 @@ private const val RESOURCES_VERSION = "0"
 class MainTileService : SuspendingTileService() {
 
     override suspend fun tileRequest(requestParams: RequestBuilders.TileRequest): TileBuilders.Tile {
-        val glucoseValue : Double = applicationContext.sensorDataStore.data.map {preferences -> preferences[SensorKeys.LAST_VALUE] ?: 0.0}.first()
-        val trendArrow : Int = applicationContext.sensorDataStore.data.map {preferences -> preferences[SensorKeys.TREND_ARROW] ?: 0}.first()
+        val dataStoreManager = DataStoreManager.getInstance(applicationContext)
+        val glucoseValue : Double = dataStoreManager.getValue(DataStoreKeys.LAST_VALUE)
+        val trendArrow : Int = dataStoreManager.getValue(DataStoreKeys.TREND_ARROW)
         return tile(requestParams, this, glucoseValue, trendArrow)
     }
 
@@ -57,7 +57,7 @@ private fun tile(
                     primaryLayout(
                         mainSlot = {
                             text(
-                                "${glucoseValue.toString()}, $trendArrow".layoutString,
+                                "$glucoseValue, $trendArrow".layoutString,
                                 typography = BODY_LARGE
                             )
                         }

@@ -22,8 +22,6 @@ class AlarmScheduler {
                 ) as AlarmManager
 
             if(alarmManager.canScheduleExactAlarms()) {
-
-
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + 1000L * 60 * delayInMinutes,

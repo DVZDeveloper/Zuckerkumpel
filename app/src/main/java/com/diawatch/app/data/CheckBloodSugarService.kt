@@ -57,11 +57,11 @@ class CheckBloodSugarService : Service() {
 
             Debugger.print(applicationContext, "CHECK_BLOOD_SUGAR_SERVICE", "Sync ausgeführt!")
 
+            val dataStoreManager = DataStoreManager.getInstance(applicationContext)
 
-            //sehr schlechta code tuan niamols es token exposed in code inna, nur für testzweck
-            val email = "***REMOVED***"
-            val password = "***REMOVED***"
 
+            val email = dataStoreManager.getValue(DataStoreKeys.EMAIL)
+            val password = dataStoreManager.getValue(DataStoreKeys.PASSWORD)
             val client = OkHttpClient()
 
 
@@ -91,6 +91,7 @@ class CheckBloodSugarService : Service() {
             }
 
             val loginJSON = JSONObject(loginResponse.body.string())
+
 
             val token =
                 loginJSON.getJSONObject("data").getJSONObject("authTicket").getString("token")
@@ -162,10 +163,11 @@ class CheckBloodSugarService : Service() {
 
 
             //Speichere neue Sensordaten und fordere Tile dazu auf, sich upzudaten
-            applicationContext.sensorDataStore.edit { preferences ->
-                preferences[SensorKeys.LAST_VALUE] = glucoseValue
-                preferences[SensorKeys.TREND_ARROW] = trendArrow
-            }
+
+            dataStoreManager.setValue(DataStoreKeys.LAST_VALUE, glucoseValue)
+            dataStoreManager.setValue(DataStoreKeys.TREND_ARROW, trendArrow)
+
+
 
 
             if (glucoseValue !in 4.0..15.0) {

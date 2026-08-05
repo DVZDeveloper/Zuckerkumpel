@@ -41,6 +41,7 @@ android {
 
 dependencies {
 
+    implementation(libs.compose.navigation)
     implementation(libs.play.services.wearable)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
@@ -64,6 +65,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.datastore.preferences)
     implementation(libs.horologist.tiles)
+    implementation(libs.wear.input)
 
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
@@ -72,4 +74,6 @@ dependencies {
     debugImplementation(libs.ui.test.manifest)
     debugImplementation(libs.tiles.renderer)
     debugImplementation(libs.tiles.tooling)
+
+
 }
