@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.first
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "DataStore")
 
-object DataStoreKeys {
+object DataStoreKey {
 
     val LAST_VALUE = DataStorePreference(
         doublePreferencesKey("last_value"),
@@ -63,15 +63,16 @@ object DataStoreKeys {
         stringPreferencesKey("password"),
         ""
     )
-
-
-
     val TOKEN = DataStorePreference(
         stringPreferencesKey("token"),
         ""
     )
     val USER_ID = DataStorePreference(
         stringPreferencesKey("UserID"),
+        ""
+    )
+    val PATIENT_ID = DataStorePreference(
+        stringPreferencesKey("PatientID"),
         ""
     )
 

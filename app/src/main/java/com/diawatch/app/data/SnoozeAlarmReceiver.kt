@@ -14,10 +14,11 @@ class SnoozeAlarmReceiver : BroadcastReceiver() {
     private val receiverScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun onReceive(context: Context, intent: Intent) {
+
         val dataStoreManager = DataStoreManager.getInstance(context.applicationContext)
         val pendingResult = goAsync()
         receiverScope.launch {
-            dataStoreManager.setValue(DataStoreKeys.TIMEOUT_TIMESTAMP, System.currentTimeMillis())
+            dataStoreManager.setValue(DataStoreKey.TIMEOUT_TIMESTAMP, System.currentTimeMillis())
             pendingResult.finish()
         }
 

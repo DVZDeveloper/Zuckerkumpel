@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -42,7 +43,6 @@ android {
 
 dependencies {
 
-    implementation(libs.compose.navigation)
     implementation(libs.play.services.wearable)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
@@ -67,6 +67,11 @@ dependencies {
     implementation(libs.datastore.preferences)
     implementation(libs.horologist.tiles)
     implementation(libs.wear.input)
+
+    implementation(libs.navigation3.runtime)
+    implementation(libs.navigation3.ui)
+    implementation(libs.compose.navigation3)
+    implementation(libs.kotlinx.serialization.json)
 
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)

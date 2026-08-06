@@ -4,8 +4,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.util.Log
-import java.io.File
 
 class AlarmScheduler {
 
@@ -30,7 +28,7 @@ class AlarmScheduler {
                         0,
                         Intent(
                             context,
-                            DownloadAlarmReceiver::class.java
+                            CheckBloodSugarReceiver::class.java
                         ),
                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                     )
@@ -45,7 +43,7 @@ class AlarmScheduler {
                         0,
                         Intent(
                             context,
-                            DownloadAlarmReceiver::class.java
+                            CheckBloodSugarReceiver::class.java
                         ),
                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                     )

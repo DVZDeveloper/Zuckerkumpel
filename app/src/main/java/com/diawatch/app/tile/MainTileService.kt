@@ -14,7 +14,7 @@ import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.tooling.preview.Preview
 import androidx.wear.tiles.tooling.preview.TilePreviewData
 import androidx.wear.tooling.preview.devices.WearDevices
-import com.diawatch.app.data.DataStoreKeys
+import com.diawatch.app.data.DataStoreKey
 import com.diawatch.app.data.DataStoreManager
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.tiles.SuspendingTileService
@@ -27,8 +27,8 @@ class MainTileService : SuspendingTileService() {
 
     override suspend fun tileRequest(requestParams: RequestBuilders.TileRequest): TileBuilders.Tile {
         val dataStoreManager = DataStoreManager.getInstance(applicationContext)
-        val glucoseValue : Double = dataStoreManager.getValue(DataStoreKeys.LAST_VALUE)
-        val trendArrow : Int = dataStoreManager.getValue(DataStoreKeys.TREND_ARROW)
+        val glucoseValue : Double = dataStoreManager.getValue(DataStoreKey.LAST_VALUE)
+        val trendArrow : Int = dataStoreManager.getValue(DataStoreKey.TREND_ARROW)
         return tile(requestParams, this, glucoseValue, trendArrow)
     }
 

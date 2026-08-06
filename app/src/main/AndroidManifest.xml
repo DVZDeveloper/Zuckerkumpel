@@ -27,7 +27,7 @@
                 android:resource="@drawable/tile_preview" />
         </service>
         <service
-            android:name=".data.CheckBloodSugarService"
+            android:name=".data.LoginService"
             android:exported="false">
         </service>
         <uses-library
@@ -42,7 +42,7 @@
             android:value="true" />
 
         <receiver
-            android:name=".data.DownloadAlarmReceiver"
+            android:name=".data.CheckBloodSugarReceiver"
             android:exported="false" />
         <receiver
             android:name=".data.SnoozeAlarmReceiver"
