@@ -2,17 +2,12 @@ package com.diawatch.app.data
 
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.wear.tiles.TileService
 import com.diawatch.app.R
 import com.diawatch.app.tile.MainTileService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -105,7 +100,7 @@ class CheckBloodSugar {
                 val action = NotificationCompat.Action.Builder(
                     R.mipmap.ic_launcher_round,
                     context.applicationContext.getString(R.string.action_sugar_alarm),
-                    SnoozeAlarmReceiver.getPendingIntent(context.applicationContext)
+                    SnoozeAlarmReceiver.getActionPendingIntent(context.applicationContext)
                 ).build()
 
 

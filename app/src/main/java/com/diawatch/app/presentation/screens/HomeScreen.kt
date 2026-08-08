@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumnDefaults
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumnItemScope
@@ -141,7 +142,8 @@ fun TransformingLazyColumnItemScope.LoginButton(
     transformationSpec: TransformationSpec,
     label: String,
     text: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    isPassword: Boolean
 ) {
 
 
@@ -182,10 +184,19 @@ fun TransformingLazyColumnItemScope.LoginButton(
             .fillMaxWidth()
             .transformedHeight(this, transformationSpec),
         transformation = SurfaceTransformation(transformationSpec),
-        label = {Text(label, style = MaterialTheme.typography.labelMedium)},
+        label = {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium
+            )
+        },
         secondaryLabel = {
             if(userInput.isNotEmpty()){
-            Text(userInput, style = MaterialTheme.typography.labelSmall)}
+                Text(
+                    if (isPassword) "•".repeat(userInput.length) else userInput,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
         }
     )
 }
@@ -247,7 +258,8 @@ fun HomeScreen(
                     transformationSpec = transformationSpec,
                     label = stringResource(R.string.button_email),
                     text = email,
-                    onValueChange = {email = it}
+                    onValueChange = {email = it},
+                    isPassword = false
                 )
             }
             item{
@@ -255,7 +267,8 @@ fun HomeScreen(
                     transformationSpec = transformationSpec,
                     label = stringResource(R.string.button_password),
                     text = password,
-                    onValueChange = {password = it}
+                    onValueChange = {password = it},
+                    isPassword = true
                 )
             }
         }

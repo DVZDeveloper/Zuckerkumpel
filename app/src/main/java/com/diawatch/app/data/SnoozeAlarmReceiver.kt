@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import android.app.NotificationManager
 
 class SnoozeAlarmReceiver : BroadcastReceiver() {
 
@@ -22,9 +23,12 @@ class SnoozeAlarmReceiver : BroadcastReceiver() {
             pendingResult.finish()
         }
 
+        //lösche die alarmbenachrichtigung falls diese existiert
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(173)
+
     }
     companion object {
-        fun getPendingIntent(context : Context) : PendingIntent{
+        fun getActionPendingIntent(context : Context) : PendingIntent{
             return PendingIntent.getBroadcast(
                 context,
                 173,

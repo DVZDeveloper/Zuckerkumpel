@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">DiaWatch</string>
     <string name="tile_label">Aktueller Blutzucker</string>
+    <string name="tile_title">Blutzucker</string>
+    <string name="tile_button">Einstellungen</string>
     <string name="title_sugar_alarm_high">Zucker hoch! %1$.1f</string>
     <string name="body_sugar_alarm_high">Bitte überprüfen Sie, ob Handeln nötig ist.</string>
     <string name="title_sugar_alarm_low">Zucker Tief! %1$.1f</string>
@@ -13,4 +15,5 @@
     <string name="button_login">Einloggen</string>
     <string name="button_email">E-Mail-Adresse</string>
     <string name="button_password">Passwort</string>
+
 </resources>
