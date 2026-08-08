@@ -18,6 +18,7 @@ class SnoozeAlarmReceiver : BroadcastReceiver() {
 
         val dataStoreManager = DataStoreManager.getInstance(context.applicationContext)
         val pendingResult = goAsync()
+        Debugger.print(context, "SNOOZE_ALARM_RECEIVER", "Snoozed Alarm")
         receiverScope.launch {
             dataStoreManager.setValue(DataStoreKey.TIMEOUT_TIMESTAMP, System.currentTimeMillis())
             pendingResult.finish()
@@ -26,18 +27,5 @@ class SnoozeAlarmReceiver : BroadcastReceiver() {
         //lösche die alarmbenachrichtigung falls diese existiert
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(173)
 
-    }
-    companion object {
-        fun getActionPendingIntent(context : Context) : PendingIntent{
-            return PendingIntent.getBroadcast(
-                context,
-                173,
-                Intent(
-                    context,
-                    SnoozeAlarmReceiver::class.java
-                ),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        }
     }
 }

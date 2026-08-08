@@ -1,7 +1,9 @@
 package com.diawatch.app.data
 
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -20,9 +22,7 @@ class CheckBloodSugar {
     companion object {
         suspend fun check(context: Context){
 
-
-
-                Debugger.print(context.applicationContext, "CHECK_BLOOD_SUGAR_SERVICE", "Sync ausgeführt!")
+            Debugger.print(context.applicationContext, "CHECK_BLOOD_SUGAR_SERVICE", "Sync ausgeführt!")
 
                 val dataStoreManager = DataStoreManager.getInstance(context.applicationContext)
 
@@ -100,7 +100,15 @@ class CheckBloodSugar {
                 val action = NotificationCompat.Action.Builder(
                     R.mipmap.ic_launcher_round,
                     context.applicationContext.getString(R.string.action_sugar_alarm),
-                    SnoozeAlarmReceiver.getActionPendingIntent(context.applicationContext)
+                    PendingIntent.getBroadcast(
+                        context,
+                        173,
+                        Intent(
+                            context,
+                            SnoozeAlarmReceiver::class.java
+                        ),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
                 ).build()
 
 
