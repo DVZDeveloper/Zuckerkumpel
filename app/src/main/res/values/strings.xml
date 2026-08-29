@@ -15,5 +15,8 @@
     <string name="button_login">Einloggen</string>
     <string name="button_email">E-Mail-Adresse</string>
     <string name="button_password">Passwort</string>
-
+    <string name="limit_title">Grenzwert</string>
+    <string name="timeout_title">Schlummern</string>
+    <string name="limit_unit">%1$d.0 mmol/l</string>
+    <string name="timeout_unit">%1$d min</string>
 </resources>

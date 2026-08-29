@@ -10,9 +10,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 
-class CheckBloodSugarReceiver: BroadcastReceiver() {
+class CheckBloodSugarReceiver : BroadcastReceiver() {
 
-    private  val scope = CoroutineScope(
+    private val scope = CoroutineScope(
         SupervisorJob() + Dispatchers.IO
     )
 
@@ -20,11 +20,10 @@ class CheckBloodSugarReceiver: BroadcastReceiver() {
         AlarmScheduler.schedule(context)
         Debugger.print(context, "DOWNLOAD_ALARM_RECEIVER", "Alarm abgelaufen")
         val pendingResult = goAsync()
-        scope.launch{
+        scope.launch {
             CheckBloodSugar.check(context)
             pendingResult.finish()
         }
-
 
 
     }

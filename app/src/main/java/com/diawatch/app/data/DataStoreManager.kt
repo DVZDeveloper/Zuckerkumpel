@@ -30,8 +30,8 @@ object DataStoreKey {
         true
     )
     val HIGH_BLOOD_SUGAR_LIMIT = DataStorePreference(
-        doublePreferencesKey("high_blood_sugar_limit"),
-        15.0
+        intPreferencesKey("high_blood_sugar_limit"),
+        15
     )
     val HIGH_BLOOD_SUGAR_TIMEOUT = DataStorePreference(
         intPreferencesKey("high_blood_sugar_timeout"),
@@ -39,30 +39,19 @@ object DataStoreKey {
     )
 
 
-
     val LOW_BLOOD_SUGAR_ALARM_ENABLED = DataStorePreference(
         booleanPreferencesKey("low_blood_sugar_alarm_enabled"),
         true
     )
     val LOW_BLOOD_SUGAR_LIMIT = DataStorePreference(
-        doublePreferencesKey("low_blood_sugar_limit"),
-        3.9
+        intPreferencesKey("low_blood_sugar_limit"),
+        4
     )
     val LOW_BLOOD_SUGAR_TIMEOUT = DataStorePreference(
         intPreferencesKey("low_blood_sugar_timeout"),
         15
     )
 
-
-
-    val EMAIL = DataStorePreference(
-        stringPreferencesKey("email"),
-        ""
-    )
-    val PASSWORD = DataStorePreference(
-        stringPreferencesKey("password"),
-        ""
-    )
     val TOKEN = DataStorePreference(
         stringPreferencesKey("token"),
         ""
@@ -77,7 +66,6 @@ object DataStoreKey {
     )
 
 
-
     val TIMEOUT_TIMESTAMP = DataStorePreference(
         longPreferencesKey("timestamp"),
         0
@@ -85,28 +73,18 @@ object DataStoreKey {
 
 }
 
-data class DataStorePreference<T> (
+data class DataStorePreference<T>(
     val key: Preferences.Key<T>,
     val default: T
 )
 
 
+object DataStoreManager {
 
+    private lateinit var dataStore: DataStore<Preferences>
 
-class DataStoreManager private constructor(
-    private val dataStore: DataStore<Preferences>
-) {
-
-    companion object {
-        @Volatile
-        private var instance: DataStoreManager? = null
-
-        fun getInstance(context: Context): DataStoreManager {
-            return instance ?: synchronized(this) {
-                instance ?: DataStoreManager(context.applicationContext.dataStore)
-                    .also { instance = it }
-            }
-        }
+    fun init(context: Context) {
+        dataStore = context.applicationContext.dataStore
     }
 
     suspend fun <T> getValue(setting: DataStorePreference<T>): T {

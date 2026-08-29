@@ -1,14 +1,14 @@
 package com.diawatch.app.data
 
-import android.app.PendingIntent
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.diawatch.app.data.DataStoreManager.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import android.app.NotificationManager
 
 class SnoozeAlarmReceiver : BroadcastReceiver() {
 
@@ -16,11 +16,10 @@ class SnoozeAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
 
-        val dataStoreManager = DataStoreManager.getInstance(context.applicationContext)
         val pendingResult = goAsync()
         Debugger.print(context, "SNOOZE_ALARM_RECEIVER", "Snoozed Alarm")
         receiverScope.launch {
-            dataStoreManager.setValue(DataStoreKey.TIMEOUT_TIMESTAMP, System.currentTimeMillis())
+            setValue(DataStoreKey.TIMEOUT_TIMESTAMP, System.currentTimeMillis())
             pendingResult.finish()
         }
 

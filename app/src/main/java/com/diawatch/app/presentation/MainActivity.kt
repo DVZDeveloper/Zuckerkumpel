@@ -4,8 +4,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
@@ -18,20 +16,16 @@ import androidx.wear.compose.navigation3.rememberSwipeDismissableSceneStrategy
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import androidx.wear.compose.ui.tooling.preview.WearPreviewFontScales
 import com.diawatch.app.data.AlarmScheduler
-import com.diawatch.app.data.Debugger
 import com.diawatch.app.data.CheckBloodSugarReceiver
+import com.diawatch.app.data.DataStoreManager
+import com.diawatch.app.data.Debugger
 import com.diawatch.app.presentation.navigation.Route
+import com.diawatch.app.presentation.screens.AlarmSettingsScreen
 import com.diawatch.app.presentation.screens.HomeScreen
 import com.diawatch.app.presentation.theme.DynamicTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 
 class MainActivity : ComponentActivity() {
 
-    private  val scope = CoroutineScope(
-        SupervisorJob() + Dispatchers.IO
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,28 +36,26 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-       Handler(Looper.getMainLooper()).post {
+        DataStoreManager.init(applicationContext)
 
-            getSystemService(NotificationManager::class.java)
-                .createNotificationChannel(
-                    NotificationChannel(
-                        "alarm_channel",
-                        "Alarm Channel",
-                        NotificationManager.IMPORTANCE_HIGH
-                    ).apply {
-                        description = "High Importance Channel für Alarme"
-                    }
-                )
-
-
-            Debugger.print(applicationContext, "MAIN_ACTIVITY", "restarted chain due to app boot")
-
-            AlarmScheduler.schedule(this)
-
-            sendBroadcast(Intent(applicationContext,CheckBloodSugarReceiver::class.java))
+        getSystemService(NotificationManager::class.java)
+            .createNotificationChannel(
+                NotificationChannel(
+                    "alarm_channel",
+                    "Alarm Channel",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "High Importance Channel für Alarme"
+                }
+            )
 
 
-        }
+        Debugger.print(applicationContext, "MAIN_ACTIVITY", "restarted chain due to app boot")
+
+        AlarmScheduler.schedule(this)
+
+        sendBroadcast(Intent(applicationContext, CheckBloodSugarReceiver::class.java))
+
 
     }
 }
@@ -79,23 +71,16 @@ fun WearApp() {
             sceneStrategies = listOf(strategy),
             entryProvider = entryProvider {
                 entry<Route.Home> {
-                    HomeScreen()
+                    HomeScreen {
+                        backStack.add(Route.AlarmSettings(it))
+                    }
                 }
-                entry<Route.AlarmSettings> {
-                    AlarmSettingsScreen()
+                entry<Route.AlarmSettings> { screen ->
+                    AlarmSettingsScreen(screen.titleID)
                 }
             }
         )
     }
-}
-
-
-
-
-@Composable
-fun AlarmSettingsScreen(
-){
-
 }
 
 

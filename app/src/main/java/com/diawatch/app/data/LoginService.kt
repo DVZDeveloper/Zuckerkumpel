@@ -1,16 +1,14 @@
 package com.diawatch.app.data
 
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import androidx.core.content.ContextCompat
+import com.diawatch.app.data.DataStoreManager.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -30,10 +28,9 @@ class LoginService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        val email : String = intent?.getStringExtra("EMAIL") ?: ""
-        val password  : String = intent?.getStringExtra("PASSWORD") ?: ""
+        val email: String = intent?.getStringExtra("EMAIL") ?: ""
+        val password: String = intent?.getStringExtra("PASSWORD") ?: ""
 
-        val dataStoreManager = DataStoreManager.getInstance(applicationContext)
         serviceScope.launch {
 
             val client = OkHttpClient()
@@ -66,7 +63,7 @@ class LoginService : Service() {
 
             val loginJSON = JSONObject(loginResponse.body.string())
 
-            if(!loginJSON.has("data")){
+            if (!loginJSON.has("data")) {
                 stopSelf()
                 return@launch
             }
@@ -104,9 +101,9 @@ class LoginService : Service() {
             val patientID =
                 connectionsJSON.getJSONArray("data").getJSONObject(0).getString("patientId")
 
-            dataStoreManager.setValue(DataStoreKey.PATIENT_ID, patientID)
-            dataStoreManager.setValue(DataStoreKey.TOKEN, token)
-            dataStoreManager.setValue(DataStoreKey.USER_ID, userID)
+            setValue(DataStoreKey.PATIENT_ID, patientID)
+            setValue(DataStoreKey.TOKEN, token)
+            setValue(DataStoreKey.USER_ID, userID)
             Log.d("LOGIN_SERVICE", "Success!")
             stopSelf()
             return@launch
@@ -116,14 +113,15 @@ class LoginService : Service() {
 
 
     companion object {
-        fun login(context : Context, email: String, password:String){
-            context.applicationContext.startService(Intent(
-                context,
-                LoginService::class.java
-            ).apply{
-                putExtra("EMAIL", email)
-                putExtra("PASSWORD", password)
-            }
+        fun login(context: Context, email: String, password: String) {
+            context.applicationContext.startService(
+                Intent(
+                    context,
+                    LoginService::class.java
+                ).apply {
+                    putExtra("EMAIL", email)
+                    putExtra("PASSWORD", password)
+                }
             )
         }
     }

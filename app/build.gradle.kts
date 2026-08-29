@@ -13,11 +13,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.diawatch.test"
+        applicationId = "com.diawatch.app"
         minSdk = 34
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1"
 
     }
 

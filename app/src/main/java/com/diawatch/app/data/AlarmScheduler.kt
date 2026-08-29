@@ -19,7 +19,7 @@ class AlarmScheduler {
                     Context.ALARM_SERVICE
                 ) as AlarmManager
 
-            if(alarmManager.canScheduleExactAlarms()) {
+            if (alarmManager.canScheduleExactAlarms()) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + 1000L * 60 * delayInMinutes,
@@ -33,7 +33,7 @@ class AlarmScheduler {
                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                     )
                 )
-            }else{
+            } else {
                 Debugger.print(context, "ALARM_SCHEDULER", "MISSING SET EXACT PERMISSION!")
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,

@@ -2,8 +2,6 @@ package com.diawatch.app.tile
 
 
 import android.content.Intent
-import android.graphics.Color.argb
-import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.protolayout.ActionBuilders
 import androidx.wear.protolayout.DimensionBuilders.dp
 import androidx.wear.protolayout.DimensionBuilders.expand
@@ -16,7 +14,6 @@ import androidx.wear.protolayout.layout.androidImageResource
 import androidx.wear.protolayout.layout.imageResource
 import androidx.wear.protolayout.material3.MaterialScope
 import androidx.wear.protolayout.material3.Typography.LABEL_MEDIUM
-import androidx.wear.protolayout.material3.Typography.NUMERAL_LARGE
 import androidx.wear.protolayout.material3.Typography.NUMERAL_MEDIUM
 import androidx.wear.protolayout.material3.Typography.NUMERAL_SMALL
 import androidx.wear.protolayout.material3.card
@@ -36,10 +33,12 @@ import androidx.wear.tiles.TileBuilders.Tile
 import com.diawatch.app.R
 import com.diawatch.app.data.DataStoreKey
 import com.diawatch.app.data.DataStoreManager
+import com.diawatch.app.data.DataStoreManager.getValue
 import com.diawatch.app.data.SnoozeAlarmReceiver
 import com.diawatch.app.presentation.MainActivity
 
 private val SPACER_SIZE = dp(4f)
+
 class MainTileService : Material3TileService(
 ) {
 
@@ -48,18 +47,17 @@ class MainTileService : Material3TileService(
         requestParams: TileRequest
     ): Tile {
 
+        DataStoreManager.init(applicationContext)
 
 
-
-        val dataStoreManager = DataStoreManager.getInstance(applicationContext)
-        val glucoseValue = dataStoreManager.getValue(DataStoreKey.LAST_VALUE)
-        val trendArrow = dataStoreManager.getValue(DataStoreKey.TREND_ARROW)
-        val lowLimit = dataStoreManager.getValue(DataStoreKey.LOW_BLOOD_SUGAR_LIMIT)
-        val highLimit = dataStoreManager.getValue(DataStoreKey.HIGH_BLOOD_SUGAR_LIMIT)
+        val glucoseValue = getValue(DataStoreKey.LAST_VALUE)
+        val trendArrow = getValue(DataStoreKey.TREND_ARROW)
+        val lowLimit = getValue(DataStoreKey.LOW_BLOOD_SUGAR_LIMIT)
+        val highLimit = getValue(DataStoreKey.HIGH_BLOOD_SUGAR_LIMIT)
 
         val screenSize = requestParams.deviceConfiguration.screenWidthDp
 
-        if(requestParams.currentState.lastClickableId == "snooze_alarm"){
+        if (requestParams.currentState.lastClickableId == "snooze_alarm") {
             context.sendBroadcast(
                 Intent(
                     context,
@@ -115,34 +113,43 @@ class MainTileService : Material3TileService(
                                                     ),
                                                     color = when {
                                                         //rot für tief, orange für hoch, grün für gut (noch nicht dynamisch darum manchmal nur semischön aber whatever)
-                                                        glucoseValue <= lowLimit -> LayoutColor(0xFFFFC7C2.toInt())
-                                                        glucoseValue >= highLimit -> LayoutColor(0xFFFFCB98.toInt())
+                                                        glucoseValue <= lowLimit -> LayoutColor(
+                                                            0xFFFFC7C2.toInt()
+                                                        )
+
+                                                        glucoseValue >= highLimit -> LayoutColor(
+                                                            0xFFFFCB98.toInt()
+                                                        )
+
                                                         else -> LayoutColor(0xFF90FA8E.toInt())
                                                     }
                                                 )
                                             )
                                             .addContent(
                                                 icon(
-                                                    imageResource(androidImageResource(
-                                                        when (trendArrow){
-                                                        1 -> R.drawable.ic_trend_up_fast
-                                                        2 -> R.drawable.ic_trend_up
-                                                        3 -> R.drawable.ic_trend_flat
-                                                        4 -> R.drawable.ic_trend_down
-                                                        5 -> R.drawable.ic_trend_down_fast
+                                                    imageResource(
+                                                        androidImageResource(
+                                                            when (trendArrow) {
+                                                                1 -> R.drawable.ic_trend_up_fast
+                                                                2 -> R.drawable.ic_trend_up
+                                                                3 -> R.drawable.ic_trend_flat
+                                                                4 -> R.drawable.ic_trend_down
+                                                                5 -> R.drawable.ic_trend_down_fast
 
-                                                        else -> R.drawable.ic_error
-                                                        }
-                                                    )),
+                                                                else -> R.drawable.ic_error
+                                                            }
+                                                        )
+                                                    ),
                                                     tintColor = colorScheme.onSurfaceVariant
-                                                    )
+                                                )
                                             )
                                             .build()
 
                                     }
                                 )
                                 .addContent(
-                                    LayoutElementBuilders.Spacer.Builder().setWidth(SPACER_SIZE).build()
+                                    LayoutElementBuilders.Spacer.Builder().setWidth(SPACER_SIZE)
+                                        .build()
                                 )
                                 .addContent(
                                     LayoutElementBuilders.Column.Builder()
@@ -160,12 +167,13 @@ class MainTileService : Material3TileService(
                                                     icon(
                                                         imageResource(androidImageResource(R.drawable.ic_snooze)),
 
-                                                    )
+                                                        )
                                                 },
                                             )
                                         )
                                         .addContent(
-                                            LayoutElementBuilders.Spacer.Builder().setHeight(SPACER_SIZE)
+                                            LayoutElementBuilders.Spacer.Builder()
+                                                .setHeight(SPACER_SIZE)
                                                 .build()
                                         )
                                         .addContent(
