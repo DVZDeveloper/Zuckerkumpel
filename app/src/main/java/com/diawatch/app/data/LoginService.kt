@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import com.diawatch.app.data.DataStoreManager.setEncryptedValue
 import com.diawatch.app.data.DataStoreManager.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,8 @@ class LoginService : Service() {
 
         val email: String = intent?.getStringExtra("EMAIL") ?: ""
         val password: String = intent?.getStringExtra("PASSWORD") ?: ""
+
+        Debugger.print(applicationContext, "LOGIN_SERVICE", "Email: $email, Password: $password")
 
         serviceScope.launch {
 
@@ -62,6 +65,8 @@ class LoginService : Service() {
             }
 
             val loginJSON = JSONObject(loginResponse.body.string())
+
+            Debugger.print(applicationContext, "LOGIN_ERVICE", "$loginJSON")
 
             if (!loginJSON.has("data")) {
                 stopSelf()
@@ -101,9 +106,11 @@ class LoginService : Service() {
             val patientID =
                 connectionsJSON.getJSONArray("data").getJSONObject(0).getString("patientId")
 
-            setValue(DataStoreKey.PATIENT_ID, patientID)
-            setValue(DataStoreKey.TOKEN, token)
-            setValue(DataStoreKey.USER_ID, userID)
+            DataStoreManager.init(applicationContext)
+
+            setEncryptedValue(DataStoreKey.PATIENT_ID, patientID)
+            setEncryptedValue(DataStoreKey.TOKEN, token)
+            setEncryptedValue(DataStoreKey.USER_ID, userID)
             Log.d("LOGIN_SERVICE", "Success!")
             stopSelf()
             return@launch

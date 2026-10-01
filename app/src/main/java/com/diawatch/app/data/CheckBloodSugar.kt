@@ -9,6 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.wear.tiles.TileService
 import com.diawatch.app.R
+import com.diawatch.app.data.DataStoreManager.getEncryptedValue
 import com.diawatch.app.data.DataStoreManager.getValue
 import com.diawatch.app.data.DataStoreManager.setValue
 import com.diawatch.app.tile.MainTileService
@@ -33,9 +34,11 @@ class CheckBloodSugar {
 
             val client = OkHttpClient()
 
-            val patientID = getValue(DataStoreKey.PATIENT_ID)
-            val userID = getValue(DataStoreKey.USER_ID)
-            val token = getValue(DataStoreKey.TOKEN)
+            DataStoreManager.init(context.applicationContext)
+
+            val patientID = getEncryptedValue(DataStoreKey.PATIENT_ID)
+            val userID = getEncryptedValue(DataStoreKey.USER_ID)
+            val token = getEncryptedValue(DataStoreKey.TOKEN)
 
             //Zuckerdaten via GET /llu/connections/{patientID}/graph
             val graphResponse = client.newCall(
@@ -83,7 +86,7 @@ class CheckBloodSugar {
             setValue(DataStoreKey.TREND_ARROW, trendArrow)
 
             Debugger.print(
-                context.applicationContext, "CHECK_BLOOD_SUGAR_SERVICE", "Updated tile"
+                context.applicationContext, "CHECK_BLOOD_SUGAR_SERVICE", "Tile update requested"
             )
             TileService.getUpdater(context.applicationContext)
                 .requestUpdate(MainTileService::class.java)
@@ -124,8 +127,7 @@ class CheckBloodSugar {
                         NotificationCompat.Builder(context.applicationContext, "alarm_channel")
                             .setSmallIcon(R.mipmap.ic_launcher_round)
                             .setContentTitle(
-                                context.applicationContext.getString(R.string.title_sugar_alarm_low)
-                                    .format(glucoseValue.toString())
+                                context.applicationContext.getString(R.string.title_sugar_alarm_low, glucoseValue)
                             )
                             .setContentText(
                                 context.applicationContext.getString(R.string.body_sugar_alarm_high)

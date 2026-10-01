@@ -1,6 +1,7 @@
 package com.diawatch.app.tile
 
 
+import android.content.Context
 import android.content.Intent
 import androidx.wear.protolayout.ActionBuilders
 import androidx.wear.protolayout.DimensionBuilders.dp
@@ -10,10 +11,13 @@ import androidx.wear.protolayout.DimensionBuilders.wrap
 import androidx.wear.protolayout.LayoutElementBuilders
 import androidx.wear.protolayout.LayoutElementBuilders.FontSetting
 import androidx.wear.protolayout.TimelineBuilders.Timeline.fromLayoutElement
+import androidx.wear.protolayout.expression.DynamicBuilders
+import androidx.wear.protolayout.expression.DynamicBuilders.DynamicInstant
 import androidx.wear.protolayout.layout.androidImageResource
 import androidx.wear.protolayout.layout.imageResource
 import androidx.wear.protolayout.material3.MaterialScope
 import androidx.wear.protolayout.material3.Typography.LABEL_MEDIUM
+import androidx.wear.protolayout.material3.Typography.NUMERAL_EXTRA_SMALL
 import androidx.wear.protolayout.material3.Typography.NUMERAL_MEDIUM
 import androidx.wear.protolayout.material3.Typography.NUMERAL_SMALL
 import androidx.wear.protolayout.material3.card
@@ -34,11 +38,18 @@ import com.diawatch.app.R
 import com.diawatch.app.data.DataStoreKey
 import com.diawatch.app.data.DataStoreManager
 import com.diawatch.app.data.DataStoreManager.getValue
+import com.diawatch.app.data.Debugger
 import com.diawatch.app.data.SnoozeAlarmReceiver
 import com.diawatch.app.presentation.MainActivity
+import java.time.Instant
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 private val SPACER_SIZE = dp(4f)
 
+private val RED = LayoutColor(0xFFFFCB98.toInt())
+private val ORANGE = LayoutColor(0xFFFFCB98.toInt())
+private val GREEN = LayoutColor(0xFFFFCB98.toInt())
 class MainTileService : Material3TileService(
 ) {
 
@@ -49,11 +60,14 @@ class MainTileService : Material3TileService(
 
         DataStoreManager.init(applicationContext)
 
+        Debugger.print(context, "TILE_SERVICE", "Tile update executed")
 
         val glucoseValue = getValue(DataStoreKey.LAST_VALUE)
         val trendArrow = getValue(DataStoreKey.TREND_ARROW)
         val lowLimit = getValue(DataStoreKey.LOW_BLOOD_SUGAR_LIMIT)
         val highLimit = getValue(DataStoreKey.HIGH_BLOOD_SUGAR_LIMIT)
+
+
 
         val screenSize = requestParams.deviceConfiguration.screenWidthDp
 
@@ -64,8 +78,9 @@ class MainTileService : Material3TileService(
                     SnoozeAlarmReceiver::class.java
                 )
             )
-
         }
+
+
 
         return Tile.Builder()
             .setTileTimeline(
@@ -101,6 +116,7 @@ class MainTileService : Material3TileService(
                                                     colorScheme.surfaceContainer
                                                 ),
                                     ) {
+
                                         LayoutElementBuilders.Row.Builder()
                                             .setWidth(wrap())
                                             .setHeight(wrap())
@@ -113,15 +129,11 @@ class MainTileService : Material3TileService(
                                                     ),
                                                     color = when {
                                                         //rot für tief, orange für hoch, grün für gut (noch nicht dynamisch darum manchmal nur semischön aber whatever)
-                                                        glucoseValue <= lowLimit -> LayoutColor(
-                                                            0xFFFFC7C2.toInt()
-                                                        )
+                                                        glucoseValue <= lowLimit -> RED
 
-                                                        glucoseValue >= highLimit -> LayoutColor(
-                                                            0xFFFFCB98.toInt()
-                                                        )
+                                                        glucoseValue >= highLimit -> ORANGE
 
-                                                        else -> LayoutColor(0xFF90FA8E.toInt())
+                                                        else -> GREEN
                                                     }
                                                 )
                                             )
@@ -231,6 +243,9 @@ class MainTileService : Material3TileService(
 
     }
 }
+
+
+
 
 
 /*
