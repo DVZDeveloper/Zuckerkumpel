@@ -46,8 +46,8 @@ object DataStoreKey {
         true
     )
     val HIGH_BLOOD_SUGAR_LIMIT = DataStorePreference(
-        intPreferencesKey("high_blood_sugar_limit"),
-        15
+        doublePreferencesKey("high_blood_sugar_limit"),
+        15.0
     )
     val HIGH_BLOOD_SUGAR_TIMEOUT = DataStorePreference(
         intPreferencesKey("high_blood_sugar_timeout"),
@@ -64,8 +64,8 @@ object DataStoreKey {
         true
     )
     val LOW_BLOOD_SUGAR_LIMIT = DataStorePreference(
-        intPreferencesKey("low_blood_sugar_limit"),
-        4
+        doublePreferencesKey("low_blood_sugar_limit"),
+        4.0
     )
     val LOW_BLOOD_SUGAR_TIMEOUT = DataStorePreference(
         intPreferencesKey("low_blood_sugar_timeout"),
@@ -127,7 +127,7 @@ object DataStoreManager {
         if(data == ""){
             return ""
         }
-        return decrypt(data)
+        return try {decrypt(data)} catch (e: Exception) {""}
     }
 
     suspend fun setEncryptedValue(setting: DataStorePreference<String>, value: String) {
@@ -186,10 +186,12 @@ object DataStoreManager {
         val bytes = Base64.decode(stored, Base64.NO_WRAP)
         DataInputStream(ByteArrayInputStream(bytes)).use {
             val ivSize = it.readInt()
+            require(ivSize in 1..32) {"Invalid IV size: $ivSize"}
             val iv = ByteArray(ivSize)
             it.readFully(iv)
 
             val encryptedBytesSize = it.readInt()
+            require(ivSize in 1..it.available()) {"Invalid data size: $encryptedBytesSize"}
             val encryptedBytes = ByteArray(encryptedBytesSize)
             it.readFully(encryptedBytes)
 

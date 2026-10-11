@@ -7,7 +7,7 @@ import com.diawatch.app.data.DataStorePreference
 data class ButtonSettings(
     val titleID: String,
     val titleResource: Int,
-    val limit: DataStorePreference<Int>,
+    val limit: DataStorePreference<Double>,
     val enabled: DataStorePreference<Boolean>,
     val timeout: DataStorePreference<Int>
 )

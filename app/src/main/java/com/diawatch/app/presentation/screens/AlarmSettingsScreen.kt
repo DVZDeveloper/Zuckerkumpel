@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -104,15 +105,15 @@ fun AlarmSettingsScreen(
 @Composable
 fun PickerDialog(
     showDialog: Boolean,
-    stepSize: Int,
-    initialValue: Int,
+    stepSize: Double,
+    initialValue: Double,
     title: String,
-    onConfirm: (Int) -> Unit,
+    onConfirm: (Double) -> Unit,
     onDismiss: () -> Unit
 ) {
     val pickerState = rememberPickerState(
         initialNumberOfOptions = 20,
-        initiallySelectedIndex = (initialValue / stepSize) - 1,
+        initiallySelectedIndex = ((initialValue / stepSize) - 1).toInt(),
         false
     )
 
@@ -170,7 +171,7 @@ fun TransformingLazyColumnItemScope.NumberEntryButton(
 
     val scope = rememberCoroutineScope()
     var showPicker by remember { mutableStateOf(false) }
-    var value by remember { mutableIntStateOf(0) }
+    var value by remember { mutableDoubleStateOf(0.0) }
 
 
     LaunchedEffect(LocalContext.current) {
@@ -179,7 +180,7 @@ fun TransformingLazyColumnItemScope.NumberEntryButton(
                 AlarmSettingsButtonType.TIMEOUT -> settings.timeout
                 AlarmSettingsButtonType.LIMIT -> settings.limit
             }
-        )
+        ).toDouble()
     }
     FilledTonalButton(
         onClick = {
@@ -206,19 +207,17 @@ fun TransformingLazyColumnItemScope.NumberEntryButton(
         showDialog = showPicker,
         initialValue = value,
         stepSize = when (type) {
-            AlarmSettingsButtonType.TIMEOUT -> 15
-            AlarmSettingsButtonType.LIMIT -> 1
+            AlarmSettingsButtonType.TIMEOUT -> 15.toDouble()
+            AlarmSettingsButtonType.LIMIT -> 0.1
         },
         onConfirm = {
             value = it
             showPicker = false
             scope.launch {
-                setValue(
-                    when (type) {
-                        AlarmSettingsButtonType.TIMEOUT -> settings.timeout
-                        AlarmSettingsButtonType.LIMIT -> settings.limit
-                    }, it
-                )
+                when(type){
+                    AlarmSettingsButtonType.TIMEOUT -> setValue(settings.timeout, it.toInt())
+                    AlarmSettingsButtonType.LIMIT -> setValue(settings.limit, it)
+                }
             }
         },
         onDismiss = { showPicker = false },

@@ -28,7 +28,8 @@ class CheckBloodSugar {
             Debugger.print(
                 context.applicationContext,
                 "CHECK_BLOOD_SUGAR_SERVICE",
-                "Sync ausgeführt!"
+                "Sync ausgeführt!",
+                true
             )
 
 
@@ -64,6 +65,7 @@ class CheckBloodSugar {
             val graphJSON = JSONObject(graphResponse.body.string())
 
             if (!graphJSON.has("data")) {
+                Debugger.print(context, "CHECK_BLOOD_SUGAR_SERVICE", "ERROR, outdated credentials", true)
                 return
             }
 
@@ -72,7 +74,8 @@ class CheckBloodSugar {
             Debugger.print(
                 context.applicationContext,
                 "CHECK_BLOOD_SUGAR_SERVICE",
-                "retrieved glucoseValue: $glucoseValue"
+                "retrieved glucoseValue: $glucoseValue",
+                true
             )
 
             //1 -> ⬆, 2 = ↗️, 3 = ➡, 4 =↘️, 5 = ⬇️
@@ -85,18 +88,11 @@ class CheckBloodSugar {
             setValue(DataStoreKey.LAST_VALUE, glucoseValue)
             setValue(DataStoreKey.TREND_ARROW, trendArrow)
 
-            Debugger.print(
-                context.applicationContext, "CHECK_BLOOD_SUGAR_SERVICE", "Tile update requested"
-            )
-            TileService.getUpdater(context.applicationContext)
-                .requestUpdate(MainTileService::class.java)
+
+
 
             val highLimit = getValue(DataStoreKey.HIGH_BLOOD_SUGAR_LIMIT)
             val lowLimit = getValue(DataStoreKey.LOW_BLOOD_SUGAR_LIMIT)
-            //DataStore ist sehr rechenaufwändig, so mus nur nötigste Arbeit ausgeführt werden
-            if (glucoseValue < highLimit && glucoseValue > lowLimit) {
-                return
-            }
 
 
             val timeoutTimestamp = getValue(DataStoreKey.TIMEOUT_TIMESTAMP)
@@ -104,6 +100,24 @@ class CheckBloodSugar {
             val highEnabled = getValue(DataStoreKey.HIGH_BLOOD_SUGAR_ALARM_ENABLED)
             val highTimeout = getValue(DataStoreKey.HIGH_BLOOD_SUGAR_TIMEOUT)
 
+            val highCurrentlyOn = highEnabled && (highTimeout.minutes + timeoutTimestamp.minutes < System.currentTimeMillis().milliseconds)
+
+            val lowEnabled = getValue(DataStoreKey.LOW_BLOOD_SUGAR_ALARM_ENABLED)
+            val lowTimeout = getValue(DataStoreKey.LOW_BLOOD_SUGAR_TIMEOUT)
+
+            val lowCurrentlyOn = lowEnabled && (lowTimeout.minutes + timeoutTimestamp.milliseconds < System.currentTimeMillis().milliseconds)
+
+            setValue(DataStoreKey.HIGH_BLOOD_SUGAR_CURRENTLY_ON, highCurrentlyOn)
+            setValue(DataStoreKey.LOW_BLOOD_SUGAR_CURRENTLY_ON, lowCurrentlyOn)
+
+
+
+            TileService.getUpdater(context.applicationContext)
+                .requestUpdate(MainTileService::class.java)
+
+            Debugger.print(
+                context.applicationContext, "CHECK_BLOOD_SUGAR_SERVICE", "Tile update requested", true
+            )
 
             val action = NotificationCompat.Action.Builder(
                 R.mipmap.ic_launcher_round,
@@ -120,7 +134,8 @@ class CheckBloodSugar {
             ).build()
 
 
-            if (glucoseValue > highLimit && highEnabled && (highTimeout.minutes + timeoutTimestamp.minutes < System.currentTimeMillis().milliseconds)) {
+
+            if (glucoseValue > highLimit && highCurrentlyOn) {
                 try {
                     NotificationManagerCompat.from(context.applicationContext).notify(
                         173,
@@ -142,11 +157,9 @@ class CheckBloodSugar {
                 return
             }
 
-            val lowEnabled = getValue(DataStoreKey.LOW_BLOOD_SUGAR_ALARM_ENABLED)
-            val lowTimeout = getValue(DataStoreKey.LOW_BLOOD_SUGAR_TIMEOUT)
 
 
-            if (glucoseValue < lowLimit && lowEnabled && (lowTimeout.minutes + timeoutTimestamp.milliseconds < System.currentTimeMillis().milliseconds)) {
+            if (glucoseValue < lowLimit && lowCurrentlyOn) {
 
                 try {
                     NotificationManagerCompat.from(context.applicationContext).notify(

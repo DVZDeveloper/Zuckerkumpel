@@ -19,4 +19,7 @@
     <string name="timeout_title">Schlummern</string>
     <string name="limit_unit">%1$d.0 mmol/l</string>
     <string name="timeout_unit">%1$d min</string>
+    <string name="error_login_no_internet">Keine Internetverbindung</string>
+    <string name="error_login_incorrect_credentials">E-Mail oder Passwort falsch</string>
+    <string name="error_login_reaccept_tou">Bitte akzeptieren Sie die neuen TOU in der LLU-App</string>
 </resources>

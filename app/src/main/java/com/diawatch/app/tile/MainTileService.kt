@@ -1,7 +1,6 @@
 package com.diawatch.app.tile
 
 
-import android.content.Context
 import android.content.Intent
 import androidx.wear.protolayout.ActionBuilders
 import androidx.wear.protolayout.DimensionBuilders.dp
@@ -11,8 +10,6 @@ import androidx.wear.protolayout.DimensionBuilders.wrap
 import androidx.wear.protolayout.LayoutElementBuilders
 import androidx.wear.protolayout.LayoutElementBuilders.FontSetting
 import androidx.wear.protolayout.TimelineBuilders.Timeline.fromLayoutElement
-import androidx.wear.protolayout.expression.DynamicBuilders
-import androidx.wear.protolayout.expression.DynamicBuilders.DynamicInstant
 import androidx.wear.protolayout.layout.androidImageResource
 import androidx.wear.protolayout.layout.imageResource
 import androidx.wear.protolayout.material3.MaterialScope
@@ -41,15 +38,15 @@ import com.diawatch.app.data.DataStoreManager.getValue
 import com.diawatch.app.data.Debugger
 import com.diawatch.app.data.SnoozeAlarmReceiver
 import com.diawatch.app.presentation.MainActivity
-import java.time.Instant
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 
 private val SPACER_SIZE = dp(4f)
 
-private val RED = LayoutColor(0xFFFFCB98.toInt())
+private val RED = LayoutColor(0xFFFFC2C6.toInt())
 private val ORANGE = LayoutColor(0xFFFFCB98.toInt())
-private val GREEN = LayoutColor(0xFFFFCB98.toInt())
+private val GREEN = LayoutColor(0xFFA0E1A2.toInt())
+
+fun spacer() = LayoutElementBuilders.Spacer.Builder().setHeight(expand()).build()
+
 class MainTileService : Material3TileService(
 ) {
 
@@ -65,13 +62,17 @@ class MainTileService : Material3TileService(
         val glucoseValue = getValue(DataStoreKey.LAST_VALUE)
         val trendArrow = getValue(DataStoreKey.TREND_ARROW)
         val lowLimit = getValue(DataStoreKey.LOW_BLOOD_SUGAR_LIMIT)
+        val lowCurrentlyOn = getValue(DataStoreKey.LOW_BLOOD_SUGAR_CURRENTLY_ON)
         val highLimit = getValue(DataStoreKey.HIGH_BLOOD_SUGAR_LIMIT)
+        val highCurrentlyOn = getValue(DataStoreKey.HIGH_BLOOD_SUGAR_CURRENTLY_ON)
 
-
+        var snoozeOverride = false
 
         val screenSize = requestParams.deviceConfiguration.screenWidthDp
 
         if (requestParams.currentState.lastClickableId == "snooze_alarm") {
+            snoozeOverride = true
+
             context.sendBroadcast(
                 Intent(
                     context,
@@ -116,43 +117,73 @@ class MainTileService : Material3TileService(
                                                     colorScheme.surfaceContainer
                                                 ),
                                     ) {
-
-                                        LayoutElementBuilders.Row.Builder()
-                                            .setWidth(wrap())
-                                            .setHeight(wrap())
+                                        LayoutElementBuilders.Column.Builder()
+                                            .setWidth(expand())
+                                            .setHeight(expand())
                                             .addContent(
                                                 text(
-                                                    "%1$.1f".format(glucoseValue).layoutString, //auf eine nachkommastelle limitieren
-                                                    typography = if (screenSize >= 225) NUMERAL_MEDIUM else NUMERAL_SMALL,
+                                                    highLimit.toString().layoutString,
+                                                    typography = NUMERAL_EXTRA_SMALL,
                                                     settings = listOf(
                                                         FontSetting.tabularNum()
                                                     ),
-                                                    color = when {
-                                                        //rot für tief, orange für hoch, grün für gut (noch nicht dynamisch darum manchmal nur semischön aber whatever)
-                                                        glucoseValue <= lowLimit -> RED
+                                                    color = if (snoozeOverride || !highCurrentlyOn) colorScheme.onSurfaceVariant else ORANGE
 
-                                                        glucoseValue >= highLimit -> ORANGE
-
-                                                        else -> GREEN
-                                                    }
                                                 )
                                             )
+                                            .addContent(spacer())
                                             .addContent(
-                                                icon(
-                                                    imageResource(
-                                                        androidImageResource(
-                                                            when (trendArrow) {
-                                                                1 -> R.drawable.ic_trend_up_fast
-                                                                2 -> R.drawable.ic_trend_up
-                                                                3 -> R.drawable.ic_trend_flat
-                                                                4 -> R.drawable.ic_trend_down
-                                                                5 -> R.drawable.ic_trend_down_fast
+                                                LayoutElementBuilders.Row.Builder()
+                                                    .setWidth(wrap())
+                                                    .setHeight(wrap())
+                                                    .addContent(
+                                                        text(
+                                                            glucoseValue.toString().layoutString, //auf eine nachkommastelle limitieren
+                                                            typography = if (screenSize >= 225) NUMERAL_MEDIUM else NUMERAL_SMALL,
+                                                            settings = listOf(
+                                                                FontSetting.tabularNum()
+                                                            ),
+                                                            color = when {
 
-                                                                else -> R.drawable.ic_error
+                                                                glucoseValue <= lowLimit -> RED
+
+                                                                glucoseValue >= highLimit -> ORANGE
+
+                                                                else -> GREEN
                                                             }
                                                         )
+                                                    )
+                                                    .addContent(
+                                                        icon(
+                                                            imageResource(
+                                                                androidImageResource(
+                                                                    when (trendArrow) {
+                                                                        1 -> R.drawable.ic_trend_up_fast
+                                                                        2 -> R.drawable.ic_trend_up
+                                                                        3 -> R.drawable.ic_trend_flat
+                                                                        4 -> R.drawable.ic_trend_down
+                                                                        5 -> R.drawable.ic_trend_down_fast
+
+                                                                        else -> R.drawable.ic_error
+                                                                    }
+                                                                )
+                                                            ),
+                                                            tintColor = colorScheme.onSurfaceVariant
+                                                        )
+                                                    )
+                                                    .build()
+                                            )
+                                            .addContent(spacer())
+                                            .addContent(
+                                                text(
+                                                    lowLimit.toString().layoutString,
+                                                    typography = NUMERAL_EXTRA_SMALL,
+
+                                                    settings = listOf(
+                                                        FontSetting.tabularNum()
                                                     ),
-                                                    tintColor = colorScheme.onSurfaceVariant
+                                                    color = if (snoozeOverride || !lowCurrentlyOn) colorScheme.onSurfaceVariant else RED
+
                                                 )
                                             )
                                             .build()
@@ -214,118 +245,10 @@ class MainTileService : Material3TileService(
                                 )
                                 .build()
                         },
-                        /*
-                        bottomSlot = {
-                            textEdgeButton(
-                                labelContent = { text(context.getString(R.string.tile_button).layoutString) },
-                                onClick = clickable(
-                                    action = ActionBuilders.LaunchAction.Builder()
-                                        .setAndroidActivity(
-                                            ActionBuilders.AndroidActivity.Builder()
-                                                .setPackageName(context.packageName)
-                                                .setClassName(MainActivity::class.java.name)
-                                                .build()
-                                        )
-                                        .build()
-                                ),
-                                colors = ButtonColors(
-                                    containerColor = colorScheme.surfaceContainerHigh,
-                                    labelColor = colorScheme.onSurface
-                                )
-                            )
-                        }
-
-                         */
                     )
                 )
             )
             .build()
-
     }
 }
 
-
-
-
-
-/*
-primaryLayout(
-                        titleSlot = {
-                            text(
-                                text = context.getString(R.string.tile_title).layoutString,
-                                typography = LABEL_MEDIUM,
-                            )
-                        },
-                        mainSlot = {
-                            LayoutElementBuilders.Row.Builder()
-                                .setWidth(expand())
-                                .setHeight(expand())
-                                .addContent(
-                                    card(
-                                        onClick = clickable(),
-                                        width = weight(2f),
-                                        height = expand(),
-                                        modifier =
-                                            LayoutModifier
-                                                .background(
-                                                    colorScheme.surfaceContainer
-                                                ),
-                                    ) {
-                                        text("a".layoutString)
-                                    }
-                                )
-                                .addContent(
-                                    LayoutElementBuilders.Spacer.Builder().setWidth(dp(3f)).build()
-                                )
-                                .addContent(
-                                    LayoutElementBuilders.Column.Builder()
-                                        .setWidth(expand())
-                                        .setHeight(expand())
-                                        .addContent(
-                                            iconButton(
-                                                onClick = clickable(),
-                                                width = weight(1f),
-                                                height = expand(),
-                                                iconContent = {
-                                                    icon(
-
-                                                        ))
-                                                    )
-                                                }
-                                            )
-                                        )
-                                        .addContent(
-                                            LayoutElementBuilders.Spacer.Builder().setHeight(dp(3f)).build()
-                                        )
-                                        .addContent(
-                                            button(
-                                                onClick = clickable(),
-                                                width = weight(1f),
-                                                height = expand(),
-                                                labelContent = {text("a".layoutString)}
-                                            )
-                                        )
-                                        .build()
-                                )
-                                .build()
-                        },
-                        bottomSlot = {
-                            textEdgeButton(
-                                labelContent = { text(context.getString(R.string.tile_button).layoutString) },
-                                onClick = clickable(
-                                    action = ActionBuilders.LaunchAction.Builder()
-                                        .setAndroidActivity(
-                                            ActionBuilders.AndroidActivity.Builder()
-                                                .setPackageName(context.packageName)
-                                                .setClassName(MainActivity::class.java.name)
-                                                .build()
-                                        )
-                                        .build()
-                                ),
-                                colors = filledTonalButtonColors()
-                            )
-                        }
-                    )
-
-
- */
