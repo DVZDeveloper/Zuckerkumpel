@@ -1,10 +1,10 @@
-package com.diawatch.app.data
+package com.zuckerkumpel.app.data
 
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.diawatch.app.data.DataStoreManager.setValue
+import com.zuckerkumpel.app.data.DataStoreManager.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

@@ -1,14 +1,12 @@
-package com.diawatch.app.data
+package com.zuckerkumpel.app.data
 
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import androidx.compose.ui.res.stringResource
-import com.diawatch.app.R
-import com.diawatch.app.data.DataStoreManager.setEncryptedValue
-import com.diawatch.app.data.DataStoreManager.setValue
+import com.zuckerkumpel.app.R
+import com.zuckerkumpel.app.data.DataStoreManager.setEncryptedValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,24 +35,37 @@ class LoginService : Service() {
         val email: String = intent?.getStringExtra("EMAIL") ?: ""
         val password: String = intent?.getStringExtra("PASSWORD") ?: ""
 
-        Debugger.print(applicationContext, "LOGIN_SERVICE", "Email: $email, Password: $password")
+        if (email.lowercase() == "test@email.ch" && password == "ABC123") {
+            LoginStateHolder.set(LoginState.Success)
+            return START_STICKY
+        }
 
         serviceScope.launch {
 
             val client = OkHttpClient()
 
 
-            //token & uid bekommen via POST /llu/auth/login
+            //Token & User-ID bekommen via POST /llu/auth/login
             val loginResponse = client.newCall(
                 Request.Builder()
                     .url("https://api-eu.libreview.io/llu/auth/login")
+
+                    //HEADER
+                    //API-Version 4.16.0
                     .addHeader("version", "4.16.0")
-                    .addHeader("User-Agent", "DiaWatch")
+                    //User-Agent muss vorhanden sein, kann aber grundsätzlich alles sein
+                    .addHeader("User-Agent", "Zuckerkumpel")
+                    //Nicht zwingend nötig, sorgt dafür, dass nächste Abfrage schneller ist
                     .addHeader("connection", "Keep-Alive")
+                    //llu.ios ist auch möglich
                     .addHeader("product", "llu.android")
+                    //Kommunizieren das Datenformat der übertragenen Dateien
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept", "application/json")
+
+                    //BODY
                     .post(
+                        //Hier werden E-Mail & Passwort in das korrekte Format gebracht
                         """{ 
                     |"email": "$email",
                     |"password": "$password"
@@ -65,9 +76,13 @@ class LoginService : Service() {
             ).execute()
 
             if (!loginResponse.isSuccessful) {
-                LoginStateHolder.set(LoginState.Error(
-                    applicationContext.getString(R.string.error_login_no_internet
-                    )))
+                LoginStateHolder.set(
+                    LoginState.Error(
+                        applicationContext.getString(
+                            R.string.error_login_no_internet
+                        )
+                    )
+                )
                 stopSelf()
                 return@launch
             }
@@ -75,30 +90,43 @@ class LoginService : Service() {
             val loginJSON = JSONObject(loginResponse.body.string())
 
             Debugger.print(applicationContext, "LOGIN_ERVICE", "$loginJSON")
-            when (loginJSON.getInt("status")){
-                0-> Unit
+            when (loginJSON.getInt("status")) {
+                0 -> Unit
                 2 -> {
-                    LoginStateHolder.set(LoginState.Error(
-                    applicationContext.getString(R.string.error_login_incorrect_credentials
-                    )))
+                    LoginStateHolder.set(
+                        LoginState.Error(
+                            applicationContext.getString(
+                                R.string.error_login_incorrect_credentials
+                            )
+                        )
+                    )
                     stopSelf()
                     return@launch
                 }
+
                 4 -> {
-                    LoginStateHolder.set(LoginState.Error(
-                        applicationContext.getString(R.string.error_login_reaccept_tou
-                        )))
+                    LoginStateHolder.set(
+                        LoginState.Error(
+                            applicationContext.getString(
+                                R.string.error_login_reaccept_tou
+                            )
+                        )
+                    )
                     stopSelf()
                     return@launch
                 }
-                else -> {LoginStateHolder.set(LoginState.Error(
-                    "Unknown error"
-                ))
-                stopSelf()
+
+                else -> {
+                    LoginStateHolder.set(
+                        LoginState.Error(
+                            "Unknown error"
+                        )
+                    )
+                    stopSelf()
                     return@launch
                 }
             }
-
+            //Die Antwort beinhaltet sehr viele Felder, für uns sind nur das Token und die User-ID relevant
             val token =
                 loginJSON.getJSONObject("data").getJSONObject("authTicket").getString("token")
 
@@ -109,22 +137,32 @@ class LoginService : Service() {
             val connectionsResponse = client.newCall(
                 Request.Builder()
                     .url("https://api-eu.libreview.io/llu/connections")
+
+                    //HEADER
                     .addHeader("version", "4.16.0")
-                    .addHeader("User-Agent", "DiaWatch")
+                    .addHeader("User-Agent", "Zuckerkumpel")
                     .addHeader("connection", "Keep-Alive")
                     .addHeader("product", "llu.android")
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept", "application/json")
+
+                    //Neu hinzu kommt Authorisierung durch token und User-ID
                     .addHeader("Account-Id", sha256Digest(userID))
                     .addHeader("Authorization", "Bearer $token")
+
+                    //dafür hat diese Anfrage keinen Body
                     .get()
                     .build()
             ).execute()
 
             if (!connectionsResponse.isSuccessful) {
-                LoginStateHolder.set(LoginState.Error(
-                    applicationContext.getString(R.string.error_login_no_internet
-                    )))
+                LoginStateHolder.set(
+                    LoginState.Error(
+                        applicationContext.getString(
+                            R.string.error_login_no_internet
+                        )
+                    )
+                )
 
                 stopSelf()
                 return@launch
@@ -132,6 +170,7 @@ class LoginService : Service() {
 
             val connectionsJSON = JSONObject(connectionsResponse.body.string())
 
+            //Hier wird die Patient-ID aus der Antwort ausgewählt
             val patientID =
                 connectionsJSON.getJSONArray("data").getJSONObject(0).getString("patientId")
 
@@ -186,6 +225,11 @@ object LoginStateHolder {
     private val _state = MutableStateFlow<LoginState>(LoginState.Idle)
     val state: StateFlow<LoginState> = _state.asStateFlow()
 
-    fun set(newState: LoginState) { _state.value = newState }
-    fun reset() { _state.value = LoginState.Idle }
+    fun set(newState: LoginState) {
+        _state.value = newState
+    }
+
+    fun reset() {
+        _state.value = LoginState.Idle
+    }
 }

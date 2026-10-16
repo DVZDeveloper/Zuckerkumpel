@@ -1,4 +1,4 @@
-package com.diawatch.app.tile
+package com.zuckerkumpel.app.tile
 
 
 import android.content.Intent
@@ -14,7 +14,6 @@ import androidx.wear.protolayout.layout.androidImageResource
 import androidx.wear.protolayout.layout.imageResource
 import androidx.wear.protolayout.material3.MaterialScope
 import androidx.wear.protolayout.material3.Typography.LABEL_MEDIUM
-import androidx.wear.protolayout.material3.Typography.NUMERAL_EXTRA_SMALL
 import androidx.wear.protolayout.material3.Typography.NUMERAL_MEDIUM
 import androidx.wear.protolayout.material3.Typography.NUMERAL_SMALL
 import androidx.wear.protolayout.material3.card
@@ -31,13 +30,13 @@ import androidx.wear.protolayout.types.layoutString
 import androidx.wear.tiles.Material3TileService
 import androidx.wear.tiles.RequestBuilders.TileRequest
 import androidx.wear.tiles.TileBuilders.Tile
-import com.diawatch.app.R
-import com.diawatch.app.data.DataStoreKey
-import com.diawatch.app.data.DataStoreManager
-import com.diawatch.app.data.DataStoreManager.getValue
-import com.diawatch.app.data.Debugger
-import com.diawatch.app.data.SnoozeAlarmReceiver
-import com.diawatch.app.presentation.MainActivity
+import com.zuckerkumpel.app.R
+import com.zuckerkumpel.app.data.DataStoreKey
+import com.zuckerkumpel.app.data.DataStoreManager
+import com.zuckerkumpel.app.data.DataStoreManager.getValue
+import com.zuckerkumpel.app.data.Debugger
+import com.zuckerkumpel.app.data.SnoozeAlarmReceiver
+import com.zuckerkumpel.app.presentation.MainActivity
 
 private val SPACER_SIZE = dp(4f)
 
@@ -57,7 +56,7 @@ class MainTileService : Material3TileService(
 
         DataStoreManager.init(applicationContext)
 
-        Debugger.print(context, "TILE_SERVICE", "Tile update executed")
+        Debugger.print(context, "TILE_SERVICE", "Tile update executed", true)
 
         val glucoseValue = getValue(DataStoreKey.LAST_VALUE)
         val trendArrow = getValue(DataStoreKey.TREND_ARROW)
@@ -123,11 +122,12 @@ class MainTileService : Material3TileService(
                                             .addContent(
                                                 text(
                                                     highLimit.toString().layoutString,
-                                                    typography = NUMERAL_EXTRA_SMALL,
+                                                    typography = LABEL_MEDIUM,
                                                     settings = listOf(
                                                         FontSetting.tabularNum()
                                                     ),
-                                                    color = if (snoozeOverride || !highCurrentlyOn) colorScheme.onSurfaceVariant else ORANGE
+                                                    color = if (snoozeOverride || !highCurrentlyOn)
+                                                        colorScheme.onSurfaceVariant else ORANGE
 
                                                 )
                                             )
@@ -138,8 +138,9 @@ class MainTileService : Material3TileService(
                                                     .setHeight(wrap())
                                                     .addContent(
                                                         text(
-                                                            glucoseValue.toString().layoutString, //auf eine nachkommastelle limitieren
-                                                            typography = if (screenSize >= 225) NUMERAL_MEDIUM else NUMERAL_SMALL,
+                                                            glucoseValue.toString().layoutString,
+                                                            typography = if (screenSize >= 225)
+                                                                NUMERAL_MEDIUM else NUMERAL_SMALL,
                                                             settings = listOf(
                                                                 FontSetting.tabularNum()
                                                             ),
@@ -158,17 +159,24 @@ class MainTileService : Material3TileService(
                                                             imageResource(
                                                                 androidImageResource(
                                                                     when (trendArrow) {
-                                                                        1 -> R.drawable.ic_trend_up_fast
-                                                                        2 -> R.drawable.ic_trend_up
+                                                                        1 -> R.drawable.ic_trend_down_fast
+                                                                        2 -> R.drawable.ic_trend_down
                                                                         3 -> R.drawable.ic_trend_flat
-                                                                        4 -> R.drawable.ic_trend_down
-                                                                        5 -> R.drawable.ic_trend_down_fast
+                                                                        4 -> R.drawable.ic_trend_up
+                                                                        5 -> R.drawable.ic_trend_up_fast
 
                                                                         else -> R.drawable.ic_error
                                                                     }
                                                                 )
                                                             ),
-                                                            tintColor = colorScheme.onSurfaceVariant
+                                                            tintColor = when {
+
+                                                                glucoseValue <= lowLimit -> RED
+
+                                                                glucoseValue >= highLimit -> ORANGE
+
+                                                                else -> GREEN
+                                                            }
                                                         )
                                                     )
                                                     .build()
@@ -177,12 +185,13 @@ class MainTileService : Material3TileService(
                                             .addContent(
                                                 text(
                                                     lowLimit.toString().layoutString,
-                                                    typography = NUMERAL_EXTRA_SMALL,
+                                                    typography = LABEL_MEDIUM,
 
                                                     settings = listOf(
                                                         FontSetting.tabularNum()
                                                     ),
-                                                    color = if (snoozeOverride || !lowCurrentlyOn) colorScheme.onSurfaceVariant else RED
+                                                    color = if (snoozeOverride || !lowCurrentlyOn)
+                                                        colorScheme.onSurfaceVariant else RED
 
                                                 )
                                             )
@@ -208,9 +217,12 @@ class MainTileService : Material3TileService(
                                                 height = expand(),
                                                 iconContent = {
                                                     icon(
-                                                        imageResource(androidImageResource(R.drawable.ic_snooze)),
-
+                                                        imageResource(
+                                                            androidImageResource(
+                                                                R.drawable.ic_snooze
+                                                            )
                                                         )
+                                                    )
                                                 },
                                             )
                                         )
@@ -226,7 +238,9 @@ class MainTileService : Material3TileService(
                                                         .setAndroidActivity(
                                                             ActionBuilders.AndroidActivity.Builder()
                                                                 .setPackageName(context.packageName)
-                                                                .setClassName(MainActivity::class.java.name)
+                                                                .setClassName(
+                                                                    MainActivity::class.java.name
+                                                                )
                                                                 .build()
                                                         )
                                                         .build()
@@ -235,8 +249,11 @@ class MainTileService : Material3TileService(
                                                 height = expand(),
                                                 iconContent = {
                                                     icon(
-                                                        imageResource(androidImageResource(R.drawable.ic_settings))
-
+                                                        imageResource(
+                                                            androidImageResource(
+                                                                R.drawable.ic_settings
+                                                            )
+                                                        )
                                                     )
                                                 }
                                             )

@@ -1,4 +1,4 @@
-package com.diawatch.app.data
+package com.zuckerkumpel.app.data
 
 
 import android.content.BroadcastReceiver
@@ -18,7 +18,7 @@ class CheckBloodSugarReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         AlarmScheduler.schedule(context)
-        Debugger.print(context, "DOWNLOAD_ALARM_RECEIVER", "Alarm abgelaufen")
+        Debugger.print(context, "DOWNLOAD_ALARM_RECEIVER", "Alarm abgelaufen", true)
         val pendingResult = goAsync()
         scope.launch {
             CheckBloodSugar.check(context)

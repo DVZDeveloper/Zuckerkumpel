@@ -1,4 +1,4 @@
-package com.diawatch.app.presentation.theme
+package com.zuckerkumpel.app.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

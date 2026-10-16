@@ -1,4 +1,4 @@
-package com.diawatch.app.presentation.screens
+package com.zuckerkumpel.app.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,12 +37,15 @@ import androidx.wear.compose.material3.lazy.TransformationSpec
 import androidx.wear.compose.material3.lazy.rememberTransformationSpec
 import androidx.wear.compose.material3.lazy.transformedHeight
 import androidx.wear.compose.material3.rememberPickerState
-import com.diawatch.app.R
-import com.diawatch.app.data.DataStoreManager.getValue
-import com.diawatch.app.data.DataStoreManager.setValue
-import com.diawatch.app.presentation.architecture.ButtonSettings
-import com.diawatch.app.presentation.architecture.ButtonSettingsType
+import androidx.wear.tiles.TileService
+import com.zuckerkumpel.app.R
+import com.zuckerkumpel.app.data.DataStoreManager.getValue
+import com.zuckerkumpel.app.data.DataStoreManager.setValue
+import com.zuckerkumpel.app.presentation.architecture.ButtonSettings
+import com.zuckerkumpel.app.presentation.architecture.ButtonSettingsType
+import com.zuckerkumpel.app.tile.MainTileService
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 enum class AlarmSettingsButtonType {
     LIMIT,
@@ -81,6 +83,7 @@ fun AlarmSettingsScreen(
                 NumberEntryButton(
                     transformationSpec = transformationSpec,
                     title = stringResource(R.string.limit_title),
+                    titleID = titleID,
                     unit = stringResource(R.string.limit_unit),
                     type = AlarmSettingsButtonType.LIMIT,
                     settings = settings
@@ -90,6 +93,7 @@ fun AlarmSettingsScreen(
                 NumberEntryButton(
                     transformationSpec = transformationSpec,
                     title = stringResource(R.string.timeout_title),
+                    titleID = titleID,
                     unit = stringResource(R.string.timeout_unit),
                     type = AlarmSettingsButtonType.TIMEOUT,
                     settings = settings
@@ -98,22 +102,42 @@ fun AlarmSettingsScreen(
         }
     }
 
-    //TimeoutPicker(settings)
-
 }
 
 @Composable
 fun PickerDialog(
     showDialog: Boolean,
-    stepSize: Double,
     initialValue: Double,
+    titleID: String,
+    type: AlarmSettingsButtonType,
     title: String,
     onConfirm: (Double) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val offset = if (type == AlarmSettingsButtonType.LIMIT) {
+        when (titleID) {
+            "high" -> 12.0
+            "low" -> 3.0
+            else -> 0.0
+        }
+    } else {
+        15.0
+    }
+
+    val stepSize = when (type) {
+        AlarmSettingsButtonType.LIMIT ->
+            when (titleID) {
+                "high" -> 0.2
+                "low" -> 0.1
+                else -> 1.0
+            }
+
+        AlarmSettingsButtonType.TIMEOUT -> 5.0
+    }
+
     val pickerState = rememberPickerState(
-        initialNumberOfOptions = 20,
-        initiallySelectedIndex = ((initialValue / stepSize) - 1).toInt(),
+        initialNumberOfOptions = 30,
+        initiallySelectedIndex = ((initialValue - offset) / stepSize).roundToInt(),
         false
     )
 
@@ -141,13 +165,13 @@ fun PickerDialog(
                     .fillMaxWidth()
             ) { index ->
                 Text(
-                    text = "${(index + 1) * stepSize}",
+                    text = "%1$.1f".format(index * stepSize + offset),
                     style = MaterialTheme.typography.numeralLarge
                 )
             }
 
             EdgeButton(
-                onClick = { onConfirm((pickerState.selectedOptionIndex + 1) * stepSize) }
+                onClick = { onConfirm((pickerState.selectedOptionIndex) * stepSize + offset) }
             ) {
                 Icon(
                     painterResource(R.drawable.ic_check),
@@ -161,6 +185,7 @@ fun PickerDialog(
 @Composable
 fun TransformingLazyColumnItemScope.NumberEntryButton(
     transformationSpec: TransformationSpec,
+    titleID: String,
     title: String,
     unit: String,
     settings: ButtonSettings,
@@ -169,6 +194,7 @@ fun TransformingLazyColumnItemScope.NumberEntryButton(
     ) {
     val screenSize = LocalConfiguration.current.screenWidthDp
 
+    val context = LocalContext.current.applicationContext
     val scope = rememberCoroutineScope()
     var showPicker by remember { mutableStateOf(false) }
     var value by remember { mutableDoubleStateOf(0.0) }
@@ -192,7 +218,8 @@ fun TransformingLazyColumnItemScope.NumberEntryButton(
         label = {
             Text(
                 title,
-                style = if (screenSize >= 190) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall,
+                style = if (screenSize >= 190) MaterialTheme.typography.labelMedium
+                else MaterialTheme.typography.labelSmall,
             )
 
         },
@@ -206,15 +233,16 @@ fun TransformingLazyColumnItemScope.NumberEntryButton(
     PickerDialog(
         showDialog = showPicker,
         initialValue = value,
-        stepSize = when (type) {
-            AlarmSettingsButtonType.TIMEOUT -> 15.toDouble()
-            AlarmSettingsButtonType.LIMIT -> 0.1
-        },
+        type = type,
+        titleID = titleID,
         onConfirm = {
             value = it
             showPicker = false
+            TileService.getUpdater(context)
+                .requestUpdate(MainTileService::class.java)
+
             scope.launch {
-                when(type){
+                when (type) {
                     AlarmSettingsButtonType.TIMEOUT -> setValue(settings.timeout, it.toInt())
                     AlarmSettingsButtonType.LIMIT -> setValue(settings.limit, it)
                 }

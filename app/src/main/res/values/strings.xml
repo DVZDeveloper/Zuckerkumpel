@@ -1,8 +1,7 @@
 <resources>
-    <string name="app_name">DiaWatch</string>
+    <string name="app_name">Zuckerkumpel</string>
     <string name="tile_label">Aktueller Blutzucker</string>
     <string name="tile_title">Blutzucker</string>
-    <string name="tile_button">Einstellungen</string>
     <string name="title_sugar_alarm_high">Zucker hoch! %1$.1f</string>
     <string name="body_sugar_alarm_high">Bitte überprüfen Sie, ob Handeln nötig ist.</string>
     <string name="title_sugar_alarm_low">Zucker Tief! %1$.1f</string>
@@ -17,9 +16,12 @@
     <string name="button_password">Passwort</string>
     <string name="limit_title">Grenzwert</string>
     <string name="timeout_title">Schlummern</string>
-    <string name="limit_unit">%1$d.0 mmol/l</string>
-    <string name="timeout_unit">%1$d min</string>
+    <string name="limit_unit">%1$.1f mmol/l</string>
+    <string name="timeout_unit">%1$.0f min</string>
     <string name="error_login_no_internet">Keine Internetverbindung</string>
     <string name="error_login_incorrect_credentials">E-Mail oder Passwort falsch</string>
     <string name="error_login_reaccept_tou">Bitte akzeptieren Sie die neuen TOU in der LLU-App</string>
+    <string name="loading">Lädt…</string>
+    <string name="success">Login erfolgreich!</string>
+    <string name="fail">Fehler</string>
 </resources>

@@ -1,8 +1,8 @@
-package com.diawatch.app.presentation.architecture
+package com.zuckerkumpel.app.presentation.architecture
 
-import com.diawatch.app.R
-import com.diawatch.app.data.DataStoreKey
-import com.diawatch.app.data.DataStorePreference
+import com.zuckerkumpel.app.R
+import com.zuckerkumpel.app.data.DataStoreKey
+import com.zuckerkumpel.app.data.DataStorePreference
 
 data class ButtonSettings(
     val titleID: String,

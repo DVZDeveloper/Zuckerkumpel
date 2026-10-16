@@ -1,4 +1,4 @@
-package com.diawatch.app.data
+package com.zuckerkumpel.app.data
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -11,7 +11,12 @@ class AlarmScheduler {
         fun schedule(context: Context) {
             val delayInMinutes = 5
 
-            Debugger.print(context, "ALARM_SCHEDULER", "Alarm set for $delayInMinutes minutes!")
+            Debugger.print(
+                context,
+                "ALARM_SCHEDULER",
+                "Alarm set for $delayInMinutes minutes!",
+                true
+            )
 
 
             val alarmManager =
@@ -34,7 +39,7 @@ class AlarmScheduler {
                     )
                 )
             } else {
-                Debugger.print(context, "ALARM_SCHEDULER", "MISSING SET EXACT PERMISSION!")
+                Debugger.print(context, "ALARM_SCHEDULER", "MISSING SET EXACT PERMISSION!", true)
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + 1000L * 60 * delayInMinutes,

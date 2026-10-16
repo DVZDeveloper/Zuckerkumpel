@@ -1,4 +1,4 @@
-package com.diawatch.app.presentation
+package com.zuckerkumpel.app.presentation
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,14 +15,14 @@ import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.navigation3.rememberSwipeDismissableSceneStrategy
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import androidx.wear.compose.ui.tooling.preview.WearPreviewFontScales
-import com.diawatch.app.data.AlarmScheduler
-import com.diawatch.app.data.CheckBloodSugarReceiver
-import com.diawatch.app.data.DataStoreManager
-import com.diawatch.app.data.Debugger
-import com.diawatch.app.presentation.navigation.Route
-import com.diawatch.app.presentation.screens.AlarmSettingsScreen
-import com.diawatch.app.presentation.screens.HomeScreen
-import com.diawatch.app.presentation.theme.DynamicTheme
+import com.zuckerkumpel.app.data.AlarmScheduler
+import com.zuckerkumpel.app.data.CheckBloodSugarReceiver
+import com.zuckerkumpel.app.data.DataStoreManager
+import com.zuckerkumpel.app.data.Debugger
+import com.zuckerkumpel.app.presentation.navigation.Route
+import com.zuckerkumpel.app.presentation.screens.AlarmSettingsScreen
+import com.zuckerkumpel.app.presentation.screens.HomeScreen
+import com.zuckerkumpel.app.presentation.theme.DynamicTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -37,17 +37,19 @@ class MainActivity : ComponentActivity() {
         }
 
         DataStoreManager.init(applicationContext)
+        val nm = getSystemService(NotificationManager::class.java)
 
-        getSystemService(NotificationManager::class.java)
-            .createNotificationChannel(
-                NotificationChannel(
-                    "alarm_channel",
-                    "Alarm Channel",
-                    NotificationManager.IMPORTANCE_HIGH
-                ).apply {
-                    description = "High Importance Channel für Alarme"
-                }
-            )
+        nm.createNotificationChannel(
+            NotificationChannel(
+                "alarm_channel",
+                "Alarm Channel",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "High Importance Channel für Alarme"
+            }
+        )
+
+
 
 
         Debugger.print(applicationContext, "MAIN_ACTIVITY", "restarted chain due to app boot")

@@ -1,9 +1,7 @@
-package com.diawatch.app.data
+package com.zuckerkumpel.app.data
 
 import android.content.Context
-import android.os.SystemClock
 import android.util.Log
-import java.io.File
 
 class Debugger {
     companion object {
@@ -11,11 +9,11 @@ class Debugger {
 
             Log.d(tag, msg)
 
-            if(saveToFile) {
+            /*if(saveToFile) {
                 val logFile = File(context.filesDir, "debug.log")
                 logFile.appendText("$tag, $msg, ${SystemClock.elapsedRealtime()} \n")
             }
-
+            */
         }
     }
 }

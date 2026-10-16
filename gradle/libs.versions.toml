@@ -54,19 +54,19 @@ guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 tiles-tooling = { group = "androidx.wear.tiles", name = "tiles-tooling", version.ref = "tilesTooling" }
 tiles-tooling-preview = { group = "androidx.wear.tiles", name = "tiles-tooling-preview", version.ref = "tilesToolingPreview" }
 watchface-complications-data-source-ktx = { group = "androidx.wear.watchface", name = "watchface-complications-data-source-ktx", version.ref = "watchfaceComplicationsDataSourceKtx" }
-wear-input = {group = "androidx.wear", name = "wear-input", version.ref = "wearInput"}
+wear-input = { group = "androidx.wear", name = "wear-input", version.ref = "wearInput" }
 
 work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
-okhttp = {module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp"}
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStore" }
-horologist-tiles = { group = "com.google.android.horologist", name = "horologist-tiles", version.ref = "horologistTiles"}
-navigation3-runtime = {group ="androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3Runtime"}
-navigation3-ui = {group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3UI"}
-compose-navigation3 = {group = "androidx.wear.compose", name = "compose-navigation3", version.ref = "composeNavigation3"}
-kotlinx-serialization-json = {group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson"}
+horologist-tiles = { group = "com.google.android.horologist", name = "horologist-tiles", version.ref = "horologistTiles" }
+navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3Runtime" }
+navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3UI" }
+compose-navigation3 = { group = "androidx.wear.compose", name = "compose-navigation3", version.ref = "composeNavigation3" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-serialization = {id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinxSerialization"}
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinxSerialization" }
 

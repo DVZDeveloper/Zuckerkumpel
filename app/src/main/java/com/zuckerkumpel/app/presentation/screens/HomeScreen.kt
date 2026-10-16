@@ -1,6 +1,5 @@
-package com.diawatch.app.presentation.screens
+package com.zuckerkumpel.app.presentation.screens
 
-import android.app.Dialog
 import android.app.RemoteInput
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
@@ -21,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,14 +54,14 @@ import androidx.wear.compose.material3.lazy.rememberTransformationSpec
 import androidx.wear.compose.material3.lazy.transformedHeight
 import androidx.wear.input.RemoteInputIntentHelper
 import androidx.wear.input.wearableExtender
-import com.diawatch.app.R
-import com.diawatch.app.data.DataStoreManager
-import com.diawatch.app.data.DataStoreManager.getValue
-import com.diawatch.app.data.DataStoreManager.setValue
-import com.diawatch.app.data.LoginService
-import com.diawatch.app.data.LoginState
-import com.diawatch.app.data.LoginStateHolder
-import com.diawatch.app.presentation.architecture.ButtonSettingsType
+import com.zuckerkumpel.app.R
+import com.zuckerkumpel.app.data.DataStoreManager
+import com.zuckerkumpel.app.data.DataStoreManager.getValue
+import com.zuckerkumpel.app.data.DataStoreManager.setValue
+import com.zuckerkumpel.app.data.LoginService
+import com.zuckerkumpel.app.data.LoginState
+import com.zuckerkumpel.app.data.LoginStateHolder
+import com.zuckerkumpel.app.presentation.architecture.ButtonSettingsType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -140,12 +138,10 @@ fun LoginEdgeButton(
     columnState: TransformingLazyColumnState,
     email: String,
     password: String,
-    onClick: (Unit) -> Unit
 ) {
     val context = LocalContext.current.applicationContext
     EdgeButton(
         onClick = {
-            onClick
             LoginService.login(context, email, password)
         },
         modifier = Modifier.scrollable(
@@ -178,7 +174,7 @@ fun TransformingLazyColumnItemScope.LoginButton(
         it.data?.let { data ->
             val results: Bundle = RemoteInput.getResultsFromIntent(data)
             val newInputText: CharSequence? = results.getCharSequence(RESULT_KEY)
-            userInput = newInputText?.toString()?.filterNot { it.isWhitespace() } ?: ""
+            userInput = newInputText?.toString()?.filterNot { text -> text.isWhitespace() } ?: ""
             onValueChange(userInput)
         }
     }
@@ -242,10 +238,7 @@ fun HomeScreen(
                 columnState = columnState,
                 email = email,
                 password = password,
-            ) {
-                password = ""
-                email = ""
-            }
+            )
         }
     ) { contentPadding ->
         TransformingLazyColumn(
@@ -313,21 +306,26 @@ fun LoginStatusDialog(
     state: LoginState
 ) {
     var visible by remember { mutableStateOf(false) }
-    var shown by remember { mutableStateOf<LoginState>(LoginState.Loading) }
 
     LaunchedEffect(state) {
         when (state) {
             LoginState.Idle -> visible = false
-            LoginState.Loading -> { shown = state; visible = true }
+            LoginState.Loading -> {
+                visible = true
+            }
+
             LoginState.Success -> {
-                shown = state; visible = true
+                visible = true
                 delay(1500)
                 visible = false
+                LoginStateHolder.reset()
             }
+
             is LoginState.Error -> {
-                shown = state; visible = true
+                visible = true
                 delay(2000)
                 visible = false
+                LoginStateHolder.reset()
             }
         }
     }
@@ -341,13 +339,14 @@ fun LoginStatusDialog(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            when (val s = shown) {
+            when (state) {
                 LoginState.Loading -> {
 
                     CircularProgressIndicator(modifier = Modifier.size(32.dp))
                     Spacer(Modifier.height(8.dp))
-                    Text("Loading…")
+                    Text(stringResource(R.string.loading))
                 }
+
                 LoginState.Success -> {
                     Icon(
                         painterResource(R.drawable.ic_check),
@@ -355,9 +354,10 @@ fun LoginStatusDialog(
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(Modifier.height(8.dp))
-                    Text("Success")
+                    Text(stringResource(R.string.success))
 
                 }
+
                 is LoginState.Error -> {
                     Icon(
                         painterResource(R.drawable.ic_error),
@@ -365,8 +365,12 @@ fun LoginStatusDialog(
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(Modifier.height(8.dp))
-                    Text(s.message ?: "Failed", textAlign = TextAlign.Center)
+                    Text(
+                        state.message ?: stringResource(R.string.fail),
+                        textAlign = TextAlign.Center
+                    )
                 }
+
                 LoginState.Idle -> Unit
             }
         }

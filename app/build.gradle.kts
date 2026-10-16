@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.diawatch.app"
+    namespace = "com.zuckerkumpel.app"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -13,11 +13,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.diawatch.app"
+        applicationId = "com.zuckerkumpel.app"
         minSdk = 34
         targetSdk = 36
         versionCode = 1
-        versionName = "1.1"
+        versionName = "1.2"
 
     }
 

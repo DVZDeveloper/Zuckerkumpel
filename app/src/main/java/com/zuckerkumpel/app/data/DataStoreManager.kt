@@ -1,4 +1,4 @@
-package com.diawatch.app.data
+package com.zuckerkumpel.app.data
 
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
@@ -13,16 +13,12 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.diawatch.app.data.DataStoreManager.TRANSFORMATION
 import kotlinx.coroutines.flow.first
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.io.InputStream
-import java.io.OutputStream
 import java.security.KeyStore
-import java.util.stream.Stream
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -102,7 +98,6 @@ data class DataStorePreference<T>(
 )
 
 
-
 object DataStoreManager {
 
 
@@ -122,12 +117,16 @@ object DataStoreManager {
         }
     }
 
-    suspend fun getEncryptedValue(setting: DataStorePreference<String>): String{
+    suspend fun getEncryptedValue(setting: DataStorePreference<String>): String {
         val data = dataStore.data.first()[setting.key] ?: setting.default
-        if(data == ""){
+        if (data == "") {
             return ""
         }
-        return try {decrypt(data)} catch (e: Exception) {""}
+        return try {
+            decrypt(data)
+        } catch (e: Exception) {
+            ""
+        }
     }
 
     suspend fun setEncryptedValue(setting: DataStorePreference<String>, value: String) {
@@ -167,7 +166,7 @@ object DataStoreManager {
 
     private fun encrypt(string: String): String {
         val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
-            init(Cipher.ENCRYPT_MODE, DataStoreManager.getKey())
+            init(Cipher.ENCRYPT_MODE, getKey())
         }
         val bytes = string.toByteArray(Charsets.UTF_8)
         val encryptedBytes = encryptCipher.doFinal(bytes)
@@ -182,16 +181,16 @@ object DataStoreManager {
         return Base64.encodeToString(byteStream.toByteArray(), Base64.NO_WRAP)
     }
 
-    private fun decrypt(stored: String): String{
+    private fun decrypt(stored: String): String {
         val bytes = Base64.decode(stored, Base64.NO_WRAP)
         DataInputStream(ByteArrayInputStream(bytes)).use {
             val ivSize = it.readInt()
-            require(ivSize in 1..32) {"Invalid IV size: $ivSize"}
+            require(ivSize in 1..32) { "Invalid IV size: $ivSize" }
             val iv = ByteArray(ivSize)
             it.readFully(iv)
 
             val encryptedBytesSize = it.readInt()
-            require(ivSize in 1..it.available()) {"Invalid data size: $encryptedBytesSize"}
+            require(ivSize in 1..it.available()) { "Invalid data size: $encryptedBytesSize" }
             val encryptedBytes = ByteArray(encryptedBytesSize)
             it.readFully(encryptedBytes)
 

@@ -1,4 +1,4 @@
-package com.diawatch.app.data
+package com.zuckerkumpel.app.data
 
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -8,11 +8,11 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.wear.tiles.TileService
-import com.diawatch.app.R
-import com.diawatch.app.data.DataStoreManager.getEncryptedValue
-import com.diawatch.app.data.DataStoreManager.getValue
-import com.diawatch.app.data.DataStoreManager.setValue
-import com.diawatch.app.tile.MainTileService
+import com.zuckerkumpel.app.R
+import com.zuckerkumpel.app.data.DataStoreManager.getEncryptedValue
+import com.zuckerkumpel.app.data.DataStoreManager.getValue
+import com.zuckerkumpel.app.data.DataStoreManager.setValue
+import com.zuckerkumpel.app.tile.MainTileService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -46,8 +46,7 @@ class CheckBloodSugar {
                 Request.Builder()
                     .url("https://api-eu.libreview.io/llu/connections/$patientID/graph")
                     .addHeader("version", "4.16.0")
-                    .addHeader("User-Agent", "DiaWatch")
-                    .addHeader("connection", "Keep-Alive")
+                    .addHeader("User-Agent", "Zuckerkumpel")
                     .addHeader("product", "llu.android")
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept", "application/json")
@@ -65,7 +64,12 @@ class CheckBloodSugar {
             val graphJSON = JSONObject(graphResponse.body.string())
 
             if (!graphJSON.has("data")) {
-                Debugger.print(context, "CHECK_BLOOD_SUGAR_SERVICE", "ERROR, outdated credentials", true)
+                Debugger.print(
+                    context,
+                    "CHECK_BLOOD_SUGAR_SERVICE",
+                    "ERROR, outdated credentials",
+                    true
+                )
                 return
             }
 
@@ -78,7 +82,6 @@ class CheckBloodSugar {
                 true
             )
 
-            //1 -> ⬆, 2 = ↗️, 3 = ➡, 4 =↘️, 5 = ⬇️
             val trendArrow = graphJSON.getJSONObject("data").getJSONObject("connection")
                 .getJSONObject("glucoseMeasurement").getInt("TrendArrow")
 
@@ -87,8 +90,6 @@ class CheckBloodSugar {
 
             setValue(DataStoreKey.LAST_VALUE, glucoseValue)
             setValue(DataStoreKey.TREND_ARROW, trendArrow)
-
-
 
 
             val highLimit = getValue(DataStoreKey.HIGH_BLOOD_SUGAR_LIMIT)
@@ -100,12 +101,16 @@ class CheckBloodSugar {
             val highEnabled = getValue(DataStoreKey.HIGH_BLOOD_SUGAR_ALARM_ENABLED)
             val highTimeout = getValue(DataStoreKey.HIGH_BLOOD_SUGAR_TIMEOUT)
 
-            val highCurrentlyOn = highEnabled && (highTimeout.minutes + timeoutTimestamp.minutes < System.currentTimeMillis().milliseconds)
+            val highCurrentlyOn =
+                highEnabled && (highTimeout.minutes + timeoutTimestamp.milliseconds <
+                        System.currentTimeMillis().milliseconds)
 
             val lowEnabled = getValue(DataStoreKey.LOW_BLOOD_SUGAR_ALARM_ENABLED)
             val lowTimeout = getValue(DataStoreKey.LOW_BLOOD_SUGAR_TIMEOUT)
 
-            val lowCurrentlyOn = lowEnabled && (lowTimeout.minutes + timeoutTimestamp.milliseconds < System.currentTimeMillis().milliseconds)
+            val lowCurrentlyOn =
+                lowEnabled && (lowTimeout.minutes + timeoutTimestamp.milliseconds <
+                        System.currentTimeMillis().milliseconds)
 
             setValue(DataStoreKey.HIGH_BLOOD_SUGAR_CURRENTLY_ON, highCurrentlyOn)
             setValue(DataStoreKey.LOW_BLOOD_SUGAR_CURRENTLY_ON, lowCurrentlyOn)
@@ -116,7 +121,10 @@ class CheckBloodSugar {
                 .requestUpdate(MainTileService::class.java)
 
             Debugger.print(
-                context.applicationContext, "CHECK_BLOOD_SUGAR_SERVICE", "Tile update requested", true
+                context.applicationContext,
+                "CHECK_BLOOD_SUGAR_SERVICE",
+                "Tile update requested",
+                true
             )
 
             val action = NotificationCompat.Action.Builder(
@@ -142,7 +150,10 @@ class CheckBloodSugar {
                         NotificationCompat.Builder(context.applicationContext, "alarm_channel")
                             .setSmallIcon(R.mipmap.ic_launcher_round)
                             .setContentTitle(
-                                context.applicationContext.getString(R.string.title_sugar_alarm_low, glucoseValue)
+                                context.applicationContext.getString(
+                                    R.string.title_sugar_alarm_high,
+                                    glucoseValue
+                                )
                             )
                             .setContentText(
                                 context.applicationContext.getString(R.string.body_sugar_alarm_high)
@@ -192,7 +203,7 @@ class CheckBloodSugar {
             return MessageDigest.getInstance("SHA-256")
                 .digest(string.toByteArray())
                 .joinToString("") { "%02x".format(it) }
-            //kotlin nutzt eine spezielle form für lambda syntax. das {} ist ein argument für die funktion jointostring.
+            //kotlin nutzt eine spezielle Form für lambda syntax. das {} ist ein argument für die funktion jointostring.
             //"%02x" bedeutet konvertiere jedes byte (it) zu hex (x), nutze immer 2 symbole (2) und fülle mit 0 (0). % bedeutet einfach dass eine Formatierungsangabe beginnt
 
         }
