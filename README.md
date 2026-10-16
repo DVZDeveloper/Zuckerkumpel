@@ -108,7 +108,7 @@ Scrolle nach unten zu "Login" und gebe deine E-Mail und dein Passwort des oben e
   Mache nutzen von der Spracheingabe und lass Leerzeichen einfach stehen, diese werden sowieso entfernt
   Achte beim Passwort auf Gross-Kleinschreibung!
 
-Zu guter letzt:
+Zu guter Letzt:
 Gehe zurück auf den Home-Bildschirm, wische einmal zur Seite um zu den Kacheln zu gelangen.
 Halte lang gedrückt, dann wische das Menü ganz nach rechts bis die Option "Neue hinzufügen" auftaucht
 Drücke auf das Plus und wähle die Kachel "Aktueller Blutzucker" aus.
